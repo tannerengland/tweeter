@@ -1,6 +1,7 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { OverlayTrigger, Tooltip } from "react-bootstrap";
-import useToastListener from "../toaster/ToastListenerHook";
+// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+// import { OverlayTrigger, Tooltip } from "react-bootstrap";
+// import useToastListener from "../toaster/ToastListenerHook";
+import OAuth from "./OAuth";
 
 interface Props {
   headingText: string;
@@ -15,11 +16,11 @@ interface Props {
 }
 
 const AuthenticationFormLayout = (props: Props) => {
-  const { displayInfoMessage } = useToastListener();
+  // const { displayInfoMessage } = useToastListener();
 
-  const displayInfoMessageWithDarkBackground = (message: string): void => {
-    displayInfoMessage(message, 3000, "text-white bg-primary");
-  };
+  // const displayInfoMessageWithDarkBackground = (message: string): void => {
+  //   displayInfoMessage(message, 3000, "text-white bg-primary");
+  // };
 
   return (
     <div className={props.isLoading ? "loading" : ""}>
@@ -39,8 +40,14 @@ const AuthenticationFormLayout = (props: Props) => {
 
             <h1 className="h4 mb-3 fw-normal">Or</h1>
             <h1 className="h5 mb-3 fw-normal">{props.oAuthHeading}</h1>
-
             <div className="text-center mb-3">
+              <OAuth infoMessage={"Google registration is not implemented."} id={"googleTooltip"} name={"Google"} iconName={"google"} />
+              <OAuth infoMessage={"Facebook registration is not implemented."} id={"facebookTooltip"} name={"Facebook"} iconName={"facebook"} />
+              <OAuth infoMessage={"Twitter registration is not implemented."} id={"twitterTooltip"} name={"Twitter"} iconName={"twitter"} />
+              <OAuth infoMessage={"LinkedIn registration is not implemented."} id={"linkedInTooltip"} name={"LinkedIn"} iconName={"linkedin"} />
+              <OAuth infoMessage={"Github registration is not implemented."} id={"githubTooltip"} name={"GitHub"} iconName={"github"} />
+            </div>
+            {/* <div className="text-center mb-3">
               <button
                 type="button"
                 className="btn btn-link btn-floating mx-1"
@@ -125,7 +132,7 @@ const AuthenticationFormLayout = (props: Props) => {
                   <FontAwesomeIcon icon={["fab", "github"]} />
                 </OverlayTrigger>
               </button>
-            </div>
+            </div> */}
 
             <div className="checkbox mb-3">
               <label>

@@ -27,11 +27,11 @@ const Login = (props: Props) => {
     return !alias || !password;
   };
 
-  // const loginOnEnter = (event: React.KeyboardEvent<HTMLElement>) => {
-  //   if (event.key == "Enter" && !checkSubmitButtonStatus()) {
-  //     doLogin();
-  //   }
-  // };
+  const loginOnEnter = (event: React.KeyboardEvent<HTMLElement>) => {
+    if (event.key == "Enter" && !checkSubmitButtonStatus()) {
+      doLogin();
+    }
+  };
 
   const doLogin = async () => {
     try {
@@ -72,9 +72,9 @@ const Login = (props: Props) => {
   const inputFieldGenerator = () => {
     return (
       <>
-        <AuthenticationFields loginOrRegister={doLogin} setAlias={setAlias} setPassword={setPassword} checkSubmitStatus={checkSubmitButtonStatus}/>
+        {/* <AuthenticationFields loginOrRegister={doLogin} setAlias={setAlias} setPassword={setPassword} checkSubmitStatus={checkSubmitButtonStatus}/> */}
 
-        {/* <AuthenticationFields loginOrRegister={loginOnEnter}/> */}
+        <AuthenticationFields loginOrRegister={loginOnEnter} setAlias={setAlias} setPassword={setPassword} />
 
         {/* <div className="form-floating">
           <input

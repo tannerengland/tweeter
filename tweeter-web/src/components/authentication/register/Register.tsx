@@ -156,8 +156,8 @@ const Register = () => {
           />
           <label htmlFor="lastNameInput">Last Name</label>
         </div>
-        <AuthenticationFields loginOrRegister={doRegister} setAlias={setAlias} setPassword={setPassword} checkSubmitStatus={checkSubmitButtonStatus}/>
-        {/* <AuthenticationFields loginOrRegister={registerOnEnter}/> */}
+        {/* <AuthenticationFields loginOrRegister={doRegister} setAlias={setAlias} setPassword={setPassword} checkSubmitStatus={checkSubmitButtonStatus}/> */}
+        <AuthenticationFields loginOrRegister={registerOnEnter} setAlias={setAlias} setPassword={setPassword} />
 
 
         {/* <div className="form-floating">

@@ -1,11 +1,10 @@
-import { useState } from "react";
+// import { useState } from "react";
 
 interface Props {
-    loginOrRegister: () => Promise<void>;
+    // loginOrRegister: () => Promise<void>;
     setAlias: React.Dispatch<React.SetStateAction<string>>;
     setPassword: React.Dispatch<React.SetStateAction<string>>;
-    checkSubmitStatus: () => boolean;
-    // loginOrRegister: (event: React.KeyboardEvent<HTMLElement>) => void;
+    loginOrRegister: (event: React.KeyboardEvent<HTMLElement>) => void;
 
 }
 
@@ -15,11 +14,11 @@ const AuthenticationFields = (props: Props) => {
     //     return !alias || !password;
     // };
 
-    const actionOnEnter = (event: React.KeyboardEvent<HTMLElement>) => {
-        if (event.key == "Enter" && !props.checkSubmitStatus()) {
-          props.loginOrRegister;
-        }
-    };
+    // const actionOnEnter = (event: React.KeyboardEvent<HTMLElement>) => {
+    //     if (event.key == "Enter" && !props.checkSubmitStatus()) {
+    //       props.loginOrRegister;
+    //     }
+    // };
 
     return (
         <>
@@ -30,8 +29,8 @@ const AuthenticationFields = (props: Props) => {
                 size={50}
                 id="aliasInput"
                 placeholder="name@example.com"
-                onKeyDown={actionOnEnter}
-                // onKeyDown={props.loginOrRegister}
+                // onKeyDown={actionOnEnter}
+                onKeyDown={props.loginOrRegister}
                 onChange={(event) => props.setAlias(event.target.value)}
                 />
                 <label htmlFor="aliasInput">Alias</label>
@@ -42,8 +41,8 @@ const AuthenticationFields = (props: Props) => {
                 className="form-control"
                 id="passwordInput"
                 placeholder="Password"
-                onKeyDown={actionOnEnter}
-                // onKeyDown={props.loginOrRegister}
+                // onKeyDown={actionOnEnter}
+                onKeyDown={props.loginOrRegister}
                 onChange={(event) => props.setPassword(event.target.value)}
                 />
                 <label htmlFor="passwordInput">Password</label>
