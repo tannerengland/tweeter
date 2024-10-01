@@ -14,7 +14,11 @@ const Post = (props: Props) => {
     useUserInfo();
   const { displayErrorMessage } = useToastListener();
 
+
   const navigateToUser = async (event: React.MouseEvent): Promise<void> => {
+
+
+
     event.preventDefault();
 
     try {

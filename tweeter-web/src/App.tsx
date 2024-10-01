@@ -14,13 +14,16 @@ import MainLayout from "./components/mainLayout/MainLayout";
 import Toaster from "./components/toaster/Toaster";
 // import FeedScroller from "./components/mainLayout/FeedScroller";
 // import StoryScroller from "./components/mainLayout/StoryScroller";
-import { AuthToken, User, FakeData, Status } from "tweeter-shared";
+// import { AuthToken, User, FakeData, Status } from "tweeter-shared";
 import UserItemScroller from "./components/mainLayout/UserItemScroller";
 import StatusItemScroller from "./components/mainLayout/StatusItemScroller";
 import useUserInfo from "./components/userInfo/userInfoHook";
 import { FolloweePresenter } from "./presenters/FolloweePresenter";
 import { UserItemView } from "./presenters/UserItemPresenter";
 import { FollowerPresenter } from "./presenters/FollowerPresenter";
+import { StoryPresenter } from "./presenters/StoryPresenter";
+import { StatusItemView } from "./presenters/StatusItemPresenter";
+import { FeedPresenter } from "./presenters/FeedPresenter";
 
 const App = () => {
   const { currentUser, authToken } = useUserInfo();
@@ -46,32 +49,32 @@ const App = () => {
 const AuthenticatedRoutes = () => {
 
 
-  const loadMoreStoryItems = async (
-    authToken: AuthToken,
-    userAlias: string,
-    pageSize: number,
-    lastItem: Status | null
-  ): Promise<[Status[], boolean]> => {
-    // TODO: Replace with the result of calling server
-    return FakeData.instance.getPageOfStatuses(lastItem, pageSize);
-  };
+  // const loadMoreStoryItems = async (
+  //   authToken: AuthToken,
+  //   userAlias: string,
+  //   pageSize: number,
+  //   lastItem: Status | null
+  // ): Promise<[Status[], boolean]> => {
+  //   // TODO: Replace with the result of calling server
+  //   return FakeData.instance.getPageOfStatuses(lastItem, pageSize);
+  // };
 
-  const loadMoreFeedItems = async (
-    authToken: AuthToken,
-    userAlias: string,
-    pageSize: number,
-    lastItem: Status | null
-  ): Promise<[Status[], boolean]> => {
-    // TODO: Replace with the result of calling server
-    return FakeData.instance.getPageOfStatuses(lastItem, pageSize);
-  };
+  // const loadMoreFeedItems = async (
+  //   authToken: AuthToken,
+  //   userAlias: string,
+  //   pageSize: number,
+  //   lastItem: Status | null
+  // ): Promise<[Status[], boolean]> => {
+  //   // TODO: Replace with the result of calling server
+  //   return FakeData.instance.getPageOfStatuses(lastItem, pageSize);
+  // };
 
   return (
     <Routes>
       <Route element={<MainLayout />}>
         <Route index element={<Navigate to="/feed" />} />
-        <Route path="feed" element={<StatusItemScroller key={1} itemType="feed" loadMore={loadMoreFeedItems} />} />
-        <Route path="story" element={<StatusItemScroller key={2} itemType="story" loadMore={loadMoreStoryItems} />} />
+        <Route path="feed" element={<StatusItemScroller key={1} presenterGenerator={(view: StatusItemView) => new FeedPresenter(view)}  />} />
+        <Route path="story" element={<StatusItemScroller key={2} presenterGenerator={(view: StatusItemView) => new StoryPresenter(view)} />} />
         <Route
           path="followees"
           element={

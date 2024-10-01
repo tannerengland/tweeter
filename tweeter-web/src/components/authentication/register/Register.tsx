@@ -5,11 +5,12 @@ import "bootstrap/dist/css/bootstrap.css";
 import { ChangeEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthenticationFormLayout from "../AuthenticationFormLayout";
-import { AuthToken, FakeData, User } from "tweeter-shared";
+import { AuthToken, User } from "tweeter-shared";
 import { Buffer } from "buffer";
 import useToastListener from "../../toaster/ToastListenerHook";
 import AuthenticationFields from "../AuthenticationFields";
 import useUserInfo from "../../userInfo/userInfoHook";
+import { RegisterPresenter, RegisterView } from "../../../presenters/RegisterPresenter";
 
 const Register = () => {
   const [firstName, setFirstName] = useState("");
@@ -20,7 +21,7 @@ const Register = () => {
   const [imageUrl, setImageUrl] = useState<string>("");
   const [imageFileExtension, setImageFileExtension] = useState<string>("");
   const [rememberMe, setRememberMe] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
 
   const navigate = useNavigate();
   const { updateUserInfo } = useUserInfo();
@@ -84,51 +85,61 @@ const Register = () => {
     return file.name.split(".").pop();
   };
 
+  const listener: RegisterView = {
+    authenticate: (user: User, authToken: AuthToken) => {updateUserInfo(user, user, authToken, rememberMe)},
+    navigateTo: (url: string) => {navigate(url)},
+    displayErrorMessage: displayErrorMessage,
+  }
+
+  const presenter = new RegisterPresenter(listener);
+
   const doRegister = async () => {
-    try {
-      setIsLoading(true);
+    presenter.doRegister(firstName, lastName, alias, password, imageBytes, imageFileExtension);
 
-      const [user, authToken] = await register(
-        firstName,
-        lastName,
-        alias,
-        password,
-        imageBytes,
-        imageFileExtension
-      );
+    // try {
+    //   setIsLoading(true);
 
-      updateUserInfo(user, user, authToken, rememberMe);
-      navigate("/");
-    } catch (error) {
-      displayErrorMessage(
-        `Failed to register user because of exception: ${error}`
-      );
-    } finally {
-      setIsLoading(false);
-    }
+    //   const [user, authToken] = await register(
+        // firstName,
+        // lastName,
+        // alias,
+        // password,
+        // imageBytes,
+        // imageFileExtension
+    //   );
+
+    //   updateUserInfo(user, user, authToken, rememberMe);
+    //   navigate("/");
+    // } catch (error) {
+    //   displayErrorMessage(
+    //     `Failed to register user because of exception: ${error}`
+    //   );
+    // } finally {
+    //   setIsLoading(false);
+    // }
   };
 
-  const register = async (
-    firstName: string,
-    lastName: string,
-    alias: string,
-    password: string,
-    userImageBytes: Uint8Array,
-    imageFileExtension: string
-  ): Promise<[User, AuthToken]> => {
-    // Not neded now, but will be needed when you make the request to the server in milestone 3
-    const imageStringBase64: string =
-      Buffer.from(userImageBytes).toString("base64");
+  // const register = async (
+  //   firstName: string,
+  //   lastName: string,
+  //   alias: string,
+  //   password: string,
+  //   userImageBytes: Uint8Array,
+  //   imageFileExtension: string
+  // ): Promise<[User, AuthToken]> => {
+  //   // Not neded now, but will be needed when you make the request to the server in milestone 3
+  //   const imageStringBase64: string =
+  //     Buffer.from(userImageBytes).toString("base64");
 
-    // TODO: Replace with the result of calling the server
-    const user = FakeData.instance.firstUser;
+  //   // TODO: Replace with the result of calling the server
+  //   const user = FakeData.instance.firstUser;
 
-    if (user === null) {
-      throw new Error("Invalid registration");
-    }
+  //   if (user === null) {
+  //     throw new Error("Invalid registration");
+  //   }
 
-    return [user, FakeData.instance.authToken];
-  };
+  //   return [user, FakeData.instance.authToken];
+  // };
 
   const inputFieldGenerator = () => {
     return (
@@ -159,8 +170,6 @@ const Register = () => {
         </div>
         {/* <AuthenticationFields loginOrRegister={doRegister} setAlias={setAlias} setPassword={setPassword} checkSubmitStatus={checkSubmitButtonStatus}/> */}
         <AuthenticationFields loginOrRegister={registerOnEnter} setAlias={setAlias} setPassword={setPassword} />
-
-
         {/* <div className="form-floating">
           <input
             type="text"
