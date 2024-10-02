@@ -7,6 +7,7 @@ import Image from "react-bootstrap/Image";
 import { AuthToken } from "tweeter-shared";
 import useToastListener from "../toaster/ToastListenerHook";
 import useUserInfo from "../userInfo/userInfoHook";
+import { LogoutPresenter, LogoutView } from "../../presenters/LogoutPresenter";
 
 const AppNavbar = () => {
   const location = useLocation();
@@ -14,25 +15,37 @@ const AppNavbar = () => {
   const { displayInfoMessage, displayErrorMessage, clearLastInfoMessage } =
     useToastListener();
 
+
+    const listener: LogoutView = {
+      displayErrorMessage: displayErrorMessage,
+      clearLastInfoMessage: clearLastInfoMessage, 
+      clearUserInfo: clearUserInfo
+    }
+    
+    const presenter = new LogoutPresenter(listener);
+
   const logOut = async () => {
     displayInfoMessage("Logging Out...", 0);
 
     try {
-      await logout(authToken!);
 
-      clearLastInfoMessage();
-      clearUserInfo();
+
+      await presenter.logOut(authToken!);
+
+      // clearLastInfoMessage();
+      // clearUserInfo();
     } catch (error) {
-      displayErrorMessage(
-        `Failed to log user out because of exception: ${error}`
-      );
+      // displayErrorMessage(
+      //   `Failed to log user out because of exception: ${error}`
+      // );
+      presenter.displayErrorMessage(error);
     }
   };
 
-  const logout = async (authToken: AuthToken): Promise<void> => {
-    // Pause so we can see the logging out message. Delete when the call to the server is implemented.
-    await new Promise((res) => setTimeout(res, 1000));
-  };
+  // const logout = async (authToken: AuthToken): Promise<void> => {
+  //   // Pause so we can see the logging out message. Delete when the call to the server is implemented.
+  //   await new Promise((res) => setTimeout(res, 1000));
+  // };
 
   return (
     <Navbar
