@@ -2,7 +2,11 @@ import { AuthToken, Status, User } from "tweeter-shared";
 import { StatusService } from "../model/service/StatusService";
 
 export interface PostStatusView {
-    displayErrorMessage: (message: string) => void
+    displayErrorMessage: (message: string) => void,
+    setIsLoading: any,
+    displayInfoMessage: (message: string, duration: number) => void,
+    setPost: (value: React.SetStateAction<string>) => void,
+    clearLastInfoMessage: () => void,
 }
 
 export class PostStatusPresenter {
@@ -16,9 +20,33 @@ export class PostStatusPresenter {
 
     public async submitPost(authToken: AuthToken, post: string, currentUser: User | null) {
 
-        const status = new Status(post, currentUser!, Date.now());
+        // const status = new Status(post, currentUser!, Date.now());
 
-        await this.statusService.postStatus(authToken!, status);
+        // await this.statusService.postStatus(authToken!, status);
+
+        try {
+            this.view.setIsLoading(true);
+            this.view.displayInfoMessage("Posting status...", 0);
+      
+            // const status = new Status(post, currentUser!, Date.now());
+      
+            // await postStatus(authToken!, status);
+      
+            const status = new Status(post, currentUser!, Date.now());
+
+            await this.statusService.postStatus(authToken!, status);
+      
+            this.view.setPost("");
+            this.view.displayInfoMessage("Status posted!", 2000);
+          } catch (error) {
+            // displayErrorMessage(
+            //   `Failed to post the status because of exception: ${error}`
+            // );
+            this.displayErrorMessage(error);
+          } finally {
+            this.view.clearLastInfoMessage();
+            this.view.setIsLoading(false);
+          }
 
     };
 

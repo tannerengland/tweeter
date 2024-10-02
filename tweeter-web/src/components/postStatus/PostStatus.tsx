@@ -17,6 +17,10 @@ const PostStatus = () => {
 
   const listener: PostStatusView = {
     displayErrorMessage: displayErrorMessage,
+    setIsLoading: setIsLoading,
+    displayInfoMessage: displayInfoMessage,
+    setPost: setPost,
+    clearLastInfoMessage: clearLastInfoMessage,
   }
 
   const presenter = new PostStatusPresenter(listener);
@@ -24,29 +28,31 @@ const PostStatus = () => {
 
   const submitPost = async (event: React.MouseEvent) => {
     event.preventDefault();
+    presenter.submitPost(authToken!, post, currentUser!);
+
     
 
-    try {
-      setIsLoading(true);
-      displayInfoMessage("Posting status...", 0);
+    // try {
+    //   setIsLoading(true);
+    //   displayInfoMessage("Posting status...", 0);
 
-      // const status = new Status(post, currentUser!, Date.now());
+    //   // const status = new Status(post, currentUser!, Date.now());
 
-      // await postStatus(authToken!, status);
+    //   // await postStatus(authToken!, status);
 
-      presenter.submitPost(authToken!, post, currentUser!);
+    //   presenter.submitPost(authToken!, post, currentUser!);
 
-      setPost("");
-      displayInfoMessage("Status posted!", 2000);
-    } catch (error) {
-      // displayErrorMessage(
-      //   `Failed to post the status because of exception: ${error}`
-      // );
-      presenter.displayErrorMessage(error);
-    } finally {
-      clearLastInfoMessage();
-      setIsLoading(false);
-    }
+    //   setPost("");
+    //   displayInfoMessage("Status posted!", 2000);
+    // } catch (error) {
+    //   // displayErrorMessage(
+    //   //   `Failed to post the status because of exception: ${error}`
+    //   // );
+    //   presenter.displayErrorMessage(error);
+    // } finally {
+    //   clearLastInfoMessage();
+    //   setIsLoading(false);
+    // }
   };
 
   // const postStatus = async (

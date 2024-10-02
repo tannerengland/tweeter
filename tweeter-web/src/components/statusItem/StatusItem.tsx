@@ -15,11 +15,11 @@ interface Props {
 
 
 const StatusItem = (props: Props) => {
-    const { displayErrorMessage } = useToastListener();
+    // const { displayErrorMessage } = useToastListener();
     const {navigateToUser} = UserNavigationHook();
 
 
-    const { setDisplayedUser, currentUser, authToken } =
+    const { currentUser, authToken } =
     useUserInfo();
     
 
