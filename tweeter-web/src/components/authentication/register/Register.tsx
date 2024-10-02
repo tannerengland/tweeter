@@ -6,7 +6,7 @@ import { ChangeEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthenticationFormLayout from "../AuthenticationFormLayout";
 import { AuthToken, User } from "tweeter-shared";
-import { Buffer } from "buffer";
+// import { Buffer } from "buffer";
 import useToastListener from "../../toaster/ToastListenerHook";
 import AuthenticationFields from "../AuthenticationFields";
 import useUserInfo from "../../userInfo/userInfoHook";
@@ -27,6 +27,21 @@ const Register = () => {
   const { updateUserInfo } = useUserInfo();
   const { displayErrorMessage } = useToastListener();
 
+  // const getFileExtension = (file: File): string | undefined => {
+  //   return file.name.split(".").pop();
+  // };
+
+  const listener: RegisterView = {
+    authenticate: (user: User, authToken: AuthToken) => {updateUserInfo(user, user, authToken, rememberMe)},
+    navigateTo: (url: string) => {navigate(url)},
+    displayErrorMessage: displayErrorMessage,
+    setImageUrl: setImageUrl,
+    setImageBytes: setImageBytes,
+    setImageFileExtension: setImageFileExtension,
+  }
+
+  const [presenter] = useState(new RegisterPresenter(listener));
+
   const checkSubmitButtonStatus = (): boolean => {
     return (
       !firstName ||
@@ -46,52 +61,44 @@ const Register = () => {
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    handleImageFile(file);
+    presenter.handleImageFile(file);
   };
 
-  const handleImageFile = (file: File | undefined) => {
-    if (file) {
-      setImageUrl(URL.createObjectURL(file));
+  // const handleImageFile = (file: File | undefined) => {
+  //   if (file) {
+  //     setImageUrl(URL.createObjectURL(file));
 
-      const reader = new FileReader();
-      reader.onload = (event: ProgressEvent<FileReader>) => {
-        const imageStringBase64 = event.target?.result as string;
+  //     const reader = new FileReader();
+  //     reader.onload = (event: ProgressEvent<FileReader>) => {
+  //       const imageStringBase64 = event.target?.result as string;
 
-        // Remove unnecessary file metadata from the start of the string.
-        const imageStringBase64BufferContents =
-          imageStringBase64.split("base64,")[1];
+  //       // Remove unnecessary file metadata from the start of the string.
+  //       const imageStringBase64BufferContents =
+  //         imageStringBase64.split("base64,")[1];
 
-        const bytes: Uint8Array = Buffer.from(
-          imageStringBase64BufferContents,
-          "base64"
-        );
+  //       const bytes: Uint8Array = Buffer.from(
+  //         imageStringBase64BufferContents,
+  //         "base64"
+  //       );
 
-        setImageBytes(bytes);
-      };
-      reader.readAsDataURL(file);
+  //       setImageBytes(bytes);
+  //     };
+  //     reader.readAsDataURL(file);
 
-      // Set image file extension (and move to a separate method)
-      const fileExtension = getFileExtension(file);
-      if (fileExtension) {
-        setImageFileExtension(fileExtension);
-      }
-    } else {
-      setImageUrl("");
-      setImageBytes(new Uint8Array());
-    }
-  };
+  //     // Set image file extension (and move to a separate method)
+  //     const fileExtension = getFileExtension(file);
+  //     if (fileExtension) {
+  //       setImageFileExtension(fileExtension);
+  //     }
+  //   } else {
+  //     setImageUrl("");
+  //     setImageBytes(new Uint8Array());
+  //   }
+  // };
 
-  const getFileExtension = (file: File): string | undefined => {
-    return file.name.split(".").pop();
-  };
 
-  const listener: RegisterView = {
-    authenticate: (user: User, authToken: AuthToken) => {updateUserInfo(user, user, authToken, rememberMe)},
-    navigateTo: (url: string) => {navigate(url)},
-    displayErrorMessage: displayErrorMessage,
-  }
 
-  const presenter = new RegisterPresenter(listener);
+
 
   const doRegister = async () => {
     presenter.doRegister(firstName, lastName, alias, password, imageBytes, imageFileExtension);

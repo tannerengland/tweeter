@@ -20,7 +20,7 @@ export class UserNavigationPresenter {
     public async navigateToUser(authToken: AuthToken, alias: string, currentUser: User): Promise<void> {
         // event.preventDefault();
     
-        // try {
+        try {
         //   const alias = this.extractAlias(event.target.toString());
     
           const user = await this.userService.getUser(authToken!, alias);
@@ -33,10 +33,10 @@ export class UserNavigationPresenter {
             }
           }
         // }
-        // } catch (error) {
-        //   this.displayErrorMessage(error);
-        //   // this.view.displayErrorMessage(`Failed to get user because of exception: ${error}`);
-        // }
+        } catch (error) {
+          this.displayErrorMessage(error);
+          // this.view.displayErrorMessage(`Failed to get user because of exception: ${error}`);
+        }
     };
 
     public extractAlias = (value: string): string => {

@@ -1,4 +1,5 @@
 // import { useContext } from "react";
+import { useState } from "react";
 import { UserNavigationPresenter, UserNavigationView } from "../../presenters/UserNavigationPresenter";
 // import { UserInfoContext } from "../userInfo/UserInfoProvider";
 import useToastListener from "../toaster/ToastListenerHook";
@@ -19,7 +20,7 @@ const useUserNavigationListener = (): UserNavigationListener => {
       setDisplayedUser: setDisplayedUser,
     }
     
-    const presenter = new UserNavigationPresenter(listener);
+    const [presenter] = useState(new UserNavigationPresenter(listener));
 
 
     const navigateToUser = async (event: React.MouseEvent): Promise<void> => {
@@ -29,7 +30,7 @@ const useUserNavigationListener = (): UserNavigationListener => {
       
         event.preventDefault();
     
-        try {
+        // try {
           const alias = presenter.extractAlias(event.target.toString());
 
           await presenter.navigateToUser(authToken!, alias, currentUser!)
@@ -43,10 +44,10 @@ const useUserNavigationListener = (): UserNavigationListener => {
           //     setDisplayedUser(user);
           //   }
           // }
-        } catch (error) {
-          // displayErrorMessage(`Failed to get user because of exception: ${error}`);
-          presenter.displayErrorMessage(error);
-        }
+        // } catch (error) {
+        //   // displayErrorMessage(`Failed to get user because of exception: ${error}`);
+        //   presenter.displayErrorMessage(error);
+        // }
       };
     
       // const extractAlias = (value: string): string => {

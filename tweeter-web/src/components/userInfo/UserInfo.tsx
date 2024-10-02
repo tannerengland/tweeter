@@ -6,11 +6,12 @@ import { Link } from "react-router-dom";
 import { AuthToken, User } from "tweeter-shared";
 import useToastListener from "../toaster/ToastListenerHook";
 import useUserInfo from "./userInfoHook";
-import { SetIsFollowerStatusPresenter, SetIsFollowerStatusView } from "../../presenters/SetIsFollowerStatusPresenter";
-import { SetNumbFolloweesPresenter, SetNumbFolloweesView } from "../../presenters/SetNumbFolloweesPresenter";
-import { SetNumbFollowersPresenter, SetNumbFollowersView } from "../../presenters/SetNumbFollowersPresenter";
-import { FollowDisplayedUserPresenter, FollowDisplayedUserView } from "../../presenters/FollowDisplayedUserPresenter";
-import { UnfollowDisplayedUserPresenter, UnfollowDisplayedUserView } from "../../presenters/UnfollowDisplayedUserPresenter";
+// import { SetIsFollowerStatusPresenter, SetIsFollowerStatusView } from "../../presenters/SetIsFollowerStatusPresenter";
+// import { SetNumbFolloweesPresenter, SetNumbFolloweesView } from "../../presenters/SetNumbFolloweesPresenter";
+// import { SetNumbFollowersPresenter, SetNumbFollowersView } from "../../presenters/SetNumbFollowersPresenter";
+// import { FollowDisplayedUserPresenter, FollowDisplayedUserView } from "../../presenters/FollowDisplayedUserPresenter";
+// import { UnfollowDisplayedUserPresenter, UnfollowDisplayedUserView } from "../../presenters/UnfollowDisplayedUserPresenter";
+import { UserInfoPresenter, UserInfoView } from "../../presenters/UserInfoPresenter";
 
 const UserInfo = () => {
   const [isFollower, setIsFollower] = useState(false);
@@ -35,19 +36,24 @@ const UserInfo = () => {
   }, [displayedUser]);
 
 
-  const setIsFollowerStatusListener: SetIsFollowerStatusView = {
+  const listener: UserInfoView = {
     displayErrorMessage: displayErrorMessage,
+    setIsLoading: setIsLoading,
+    displayInfoMessage: displayInfoMessage,
     setIsFollower: setIsFollower,
+    setFollowerCount: setFollowerCount,
+    setFolloweeCount: setFolloweeCount,
+    clearLastInfoMessage: clearLastInfoMessage,
   }
 
-  const setIsFollowerStatusPresenter = new SetIsFollowerStatusPresenter(setIsFollowerStatusListener);
+  const [presenter] = useState(new UserInfoPresenter(listener));
 
   const setIsFollowerStatus = async (
     authToken: AuthToken,
     currentUser: User,
     displayedUser: User
   ) => {
-    try {
+    // try {
       // if (currentUser === displayedUser) {
       //   setIsFollower(false);
       // } else {
@@ -55,13 +61,13 @@ const UserInfo = () => {
       //     await getIsFollowerStatus(authToken!, currentUser!, displayedUser!)
       //   );
       // }
-      setIsFollowerStatusPresenter.setIsFollowerStatus(authToken!, currentUser!, displayedUser!);
-    } catch (error) {
+      presenter.setIsFollowerStatus(authToken!, currentUser!, displayedUser!);
+    // } catch (error) {
       // displayErrorMessage(
       //   `Failed to determine follower status because of exception: ${error}`
       // );
-      setIsFollowerStatusPresenter.displayErrorMessage(error);
-    }
+    //   setIsFollowerStatusPresenter.displayErrorMessage(error);
+    // }
   };
 
   // const getIsFollowerStatus = async (
@@ -73,26 +79,26 @@ const UserInfo = () => {
   //   return FakeData.instance.isFollower();
   // };
 
-  const setNumbFolloweesListener: SetNumbFolloweesView = {
-    displayErrorMessage: displayErrorMessage,
-    setFolloweeCount: setFolloweeCount,
-  }
+  // const setNumbFolloweesListener: SetNumbFolloweesView = {
+  //   displayErrorMessage: displayErrorMessage,
+  //   setFolloweeCount: setFolloweeCount,
+  // }
 
-  const setNumbFolloweesPresenter = new SetNumbFolloweesPresenter(setNumbFolloweesListener);
+  // const [setNumbFolloweesPresenter] = useState(new SetNumbFolloweesPresenter(setNumbFolloweesListener));
 
   const setNumbFollowees = async (
     authToken: AuthToken,
     displayedUser: User
   ) => {
-    try {
+    // try {
       // setFolloweeCount(await getFolloweeCount(authToken, displayedUser));
-      setNumbFolloweesPresenter.setNumbFollowees(authToken, displayedUser);
-    } catch (error) {
-      // displayErrorMessage(
-      //   `Failed to get followees count because of exception: ${error}`
-      // );
-      setNumbFolloweesPresenter.displayErrorMessage(error);
-    }
+      presenter.setNumbFollowees(authToken, displayedUser);
+    // } catch (error) {
+    //   // displayErrorMessage(
+    //   //   `Failed to get followees count because of exception: ${error}`
+    //   // );
+    //   setNumbFolloweesPresenter.displayErrorMessage(error);
+    // }
   };
 
   // const getFolloweeCount = async (
@@ -103,27 +109,27 @@ const UserInfo = () => {
   //   return FakeData.instance.getFolloweeCount(user.alias);
   // };
 
-  const setNumbFollowersListener: SetNumbFollowersView = {
-    displayErrorMessage: displayErrorMessage,
-    setFollowerCount: setFollowerCount,
-  }
+  // const setNumbFollowersListener: SetNumbFollowersView = {
+  //   displayErrorMessage: displayErrorMessage,
+  //   setFollowerCount: setFollowerCount,
+  // }
 
-  const setNumbFollowersPresenter = new SetNumbFollowersPresenter(setNumbFollowersListener);
+  // const [setNumbFollowersPresenter] = useState(new SetNumbFollowersPresenter(setNumbFollowersListener));
 
   const setNumbFollowers = async (
     authToken: AuthToken,
     displayedUser: User
   ) => {
-    try {
+    // try {
       // setFollowerCount(await getFollowerCount(authToken, displayedUser));
-      setNumbFollowersPresenter.setNumbFollowers(authToken, displayedUser);
+      presenter.setNumbFollowers(authToken, displayedUser);
 
-    } catch (error) {
+    // } catch (error) {
       // displayErrorMessage(
       //   `Failed to get followers count because of exception: ${error}`
       // );
-      setNumbFollowersPresenter.displayErrorMessage(error);
-    }
+    //   setNumbFollowersPresenter.displayErrorMessage(error);
+    // }
   };
 
   // const getFollowerCount = async (
@@ -139,24 +145,24 @@ const UserInfo = () => {
     setDisplayedUser(currentUser!);
   };
 
-  const followDisplayedUserListener: FollowDisplayedUserView = {
-    displayErrorMessage: displayErrorMessage,
-    setIsLoading: setIsLoading,
-    displayInfoMessage: displayInfoMessage,
-    setIsFollower: setIsFollower,
-    setFollowerCount: setFollowerCount,
-    setFolloweeCount: setFolloweeCount,
-    clearLastInfoMessage: clearLastInfoMessage,
-  }
+  // const followDisplayedUserListener: FollowDisplayedUserView = {
+  //   displayErrorMessage: displayErrorMessage,
+  //   setIsLoading: setIsLoading,
+  //   displayInfoMessage: displayInfoMessage,
+  //   setIsFollower: setIsFollower,
+  //   setFollowerCount: setFollowerCount,
+  //   setFolloweeCount: setFolloweeCount,
+  //   clearLastInfoMessage: clearLastInfoMessage,
+  // }
 
-  const followDisplayedUserPresenter = new FollowDisplayedUserPresenter(followDisplayedUserListener);
+  // const [followDisplayedUserPresenter] = useState(new FollowDisplayedUserPresenter(followDisplayedUserListener));
 
   const followDisplayedUser = async (
     event: React.MouseEvent
   ): Promise<void> => {
     event.preventDefault();
 
-    followDisplayedUserPresenter.followDisplayedUser(authToken!, displayedUser!);
+    presenter.followDisplayedUser(authToken!, displayedUser!);
 
     // try {
     //   setIsLoading(true);
@@ -195,24 +201,24 @@ const UserInfo = () => {
   //   return [followerCount, followeeCount];
   // };
 
-  const unfollowDisplayedUserListener: UnfollowDisplayedUserView = {
-    displayErrorMessage: displayErrorMessage,
-    setIsLoading: setIsLoading,
-    displayInfoMessage: displayInfoMessage,
-    setIsFollower: setIsFollower,
-    setFollowerCount: setFollowerCount,
-    setFolloweeCount: setFolloweeCount,
-    clearLastInfoMessage: clearLastInfoMessage,
-  }
+  // const unfollowDisplayedUserListener: UnfollowDisplayedUserView = {
+  //   displayErrorMessage: displayErrorMessage,
+  //   setIsLoading: setIsLoading,
+  //   displayInfoMessage: displayInfoMessage,
+  //   setIsFollower: setIsFollower,
+  //   setFollowerCount: setFollowerCount,
+  //   setFolloweeCount: setFolloweeCount,
+  //   clearLastInfoMessage: clearLastInfoMessage,
+  // }
 
-  const unfollowDisplayedUserPresenter = new UnfollowDisplayedUserPresenter(unfollowDisplayedUserListener);
+  // const [unfollowDisplayedUserPresenter] = useState(new UnfollowDisplayedUserPresenter(unfollowDisplayedUserListener));
 
   const unfollowDisplayedUser = async (
     event: React.MouseEvent
   ): Promise<void> => {
     event.preventDefault();
 
-    unfollowDisplayedUserPresenter.unfollowDisplayedUser(authToken!, displayedUser!);
+    presenter.unfollowDisplayedUser(authToken!, displayedUser!);
 
     // try {
     //   setIsLoading(true);

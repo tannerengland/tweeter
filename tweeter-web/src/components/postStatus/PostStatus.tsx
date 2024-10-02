@@ -23,7 +23,7 @@ const PostStatus = () => {
     clearLastInfoMessage: clearLastInfoMessage,
   }
 
-  const presenter = new PostStatusPresenter(listener);
+  const [presenter] = useState(new PostStatusPresenter(listener));
 
 
   const submitPost = async (event: React.MouseEvent) => {

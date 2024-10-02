@@ -8,6 +8,7 @@ import { AuthToken } from "tweeter-shared";
 import useToastListener from "../toaster/ToastListenerHook";
 import useUserInfo from "../userInfo/userInfoHook";
 import { LogoutPresenter, LogoutView } from "../../presenters/LogoutPresenter";
+import { useState } from "react";
 
 const AppNavbar = () => {
   const location = useLocation();
@@ -22,24 +23,24 @@ const AppNavbar = () => {
       clearUserInfo: clearUserInfo
     }
     
-    const presenter = new LogoutPresenter(listener);
+    const [presenter] = useState(new LogoutPresenter(listener));
 
   const logOut = async () => {
     displayInfoMessage("Logging Out...", 0);
 
-    try {
+    // try {
 
 
       await presenter.logOut(authToken!);
 
       // clearLastInfoMessage();
       // clearUserInfo();
-    } catch (error) {
-      // displayErrorMessage(
-      //   `Failed to log user out because of exception: ${error}`
-      // );
-      presenter.displayErrorMessage(error);
-    }
+    // } catch (error) {
+    //   // displayErrorMessage(
+    //   //   `Failed to log user out because of exception: ${error}`
+    //   // );
+    //   presenter.displayErrorMessage(error);
+    // }
   };
 
   // const logout = async (authToken: AuthToken): Promise<void> => {

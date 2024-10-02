@@ -24,17 +24,19 @@ export class LogoutPresenter {
     public async logOut(authToken: AuthToken)  {
         // displayInfoMessage("Logging Out...", 0);
     
-        // try {
+        try {
         await this.userService.logout(authToken!);
 
         this.view.clearLastInfoMessage();
         this.view.clearUserInfo();
           
-        // } catch (error) {
+        } catch (error) {
         //   displayErrorMessage(
         //     `Failed to log user out because of exception: ${error}`
         //   );
-        // }
+            this.displayErrorMessage(error);
+
+        }
       };
 
     public displayErrorMessage(error: unknown) {
