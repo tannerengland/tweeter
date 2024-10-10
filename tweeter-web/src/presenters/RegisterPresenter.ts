@@ -1,34 +1,41 @@
 import { User, AuthToken } from "tweeter-shared";
 import { UserService } from "../model/service/UserService";
 import { Buffer } from "buffer";
+import { Presenter, View } from "./Presenter";
 
 
-export interface RegisterView {
+export interface RegisterView extends View {
     authenticate: (currentUser: User, authToken: AuthToken) => void;
     navigateTo: (url: string) => void;
-    displayErrorMessage: (message: string) => void;
+    // displayErrorMessage: (message: string) => void;
     setImageUrl: (value: React.SetStateAction<string>) => void;
     setImageBytes: (value: React.SetStateAction<Uint8Array>) => void;
     setImageFileExtension: (value: React.SetStateAction<string>) => void;
 
 }
 
-export class RegisterPresenter {
+export class RegisterPresenter extends Presenter<RegisterView>{
 
     private setIsLoading = false;
 
     private userService: UserService;
-    private view: RegisterView;
+    // private view: RegisterView;
 
     public constructor(view: RegisterView) {
-        this.userService = new UserService();
-        this.view = view;
+      // this.view = view;
+      super(view);
+      this.userService = new UserService();
+    }
+
+    protected get view(): RegisterView {
+      return super.view as RegisterView;
     }
 
     public async doRegister(firstName: string, lastName: string, alias: string, password: string, imageBytes: Uint8Array, imageFileExtension: string) {
-        try {
+      try {
+        this.doFailureReportingOperation(async () => {
           this.setIsLoading = true;
-    
+      
           const [user, authToken] = await this.userService.register(
             firstName,
             lastName,
@@ -40,14 +47,11 @@ export class RegisterPresenter {
     
           this.view.authenticate(user, authToken);
           this.view.navigateTo("/");
-        } catch (error) {
-            this.view.displayErrorMessage(
-            `Failed to register user because of exception: ${error}`
-          );
-        } finally {
-            this.setIsLoading = false;
-        }
-      };
+        }, "register user");
+      } finally {
+        this.setIsLoading = false;
+      }
+    };
 
       public handleImageFile (file: File | undefined)  {
         if (file) {

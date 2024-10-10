@@ -1,28 +1,30 @@
 import { AuthToken, User } from "tweeter-shared";
 import { UserService } from "../model/service/UserService";
+import { Presenter, View } from "./Presenter";
 
-export interface UserNavigationView {
+export interface UserNavigationView extends View {
   displayErrorMessage: (message: string) => void;
   setDisplayedUser: (user: User) => void;
 }
 
-export class UserNavigationPresenter {
+export class UserNavigationPresenter extends Presenter<UserNavigationView> {
 
     private userService: UserService;
-    private view: UserNavigationView; 
+    // private view: UserNavigationView; 
 
     public constructor(view: UserNavigationView) {
-        this.userService = new UserService();
-        this.view = view;
+      // this.view = view;
+      super(view);
+      this.userService = new UserService();
     }
 
+    protected get view(): UserNavigationView {
+      return super.view as UserNavigationView;
+    }
 
     public async navigateToUser(authToken: AuthToken, alias: string, currentUser: User): Promise<void> {
-        // event.preventDefault();
-    
-        try {
-        //   const alias = this.extractAlias(event.target.toString());
-    
+
+        this.doFailureReportingOperation(async () => {
           const user = await this.userService.getUser(authToken!, alias);
     
           if (!!user) {
@@ -32,11 +34,9 @@ export class UserNavigationPresenter {
               this.view.setDisplayedUser(user);
             }
           }
-        // }
-        } catch (error) {
-          this.displayErrorMessage(error);
-          // this.view.displayErrorMessage(`Failed to get user because of exception: ${error}`);
-        }
+        }, "get user")
+
+    
     };
 
     public extractAlias = (value: string): string => {
@@ -44,8 +44,5 @@ export class UserNavigationPresenter {
         return value.substring(index);
     };
 
-    public displayErrorMessage(error: unknown) {
-        this.view.displayErrorMessage(`Failed to get user because of exception: ${error}`);
-    }
     
 }

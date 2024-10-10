@@ -1,36 +1,45 @@
-import { AuthToken } from "tweeter-shared";
-import { StatusService } from "../model/service/StatusService";
+import { AuthToken, Status } from "tweeter-shared";
+// import { StatusService } from "../model/service/StatusService";
+import { PAGE_SIZE } from "./PagedItemPresenter";
 import { StatusItemPresenter, StatusItemView } from "./StatusItemPresenter";
 
-export const PAGE_SIZE = 10;
+// export const PAGE_SIZE = 10;
 
 export class FeedPresenter extends StatusItemPresenter {
-    private storyService: StatusService;
+  protected getMoreItems(authToken: AuthToken, userAlias: string): Promise<[Status[], boolean]> {
+    return this.service.loadMoreFeedItems (
+      authToken,
+      userAlias,
+      PAGE_SIZE,
+      this.lastItem
+    );
+  }
+  protected getItemDescription(): string {
+    return "load feed items";
+  }
+    // private storyService: StatusService;
 
 
-    public constructor(view: StatusItemView) {
-        super(view);
-        this.storyService = new StatusService();
-    }
+    // protected constructor(view: StatusItemView) {
+    //     super(view);
+    //     // this.storyService = new StatusService();
+    // }
 
-    public async loadMoreItems(authToken: AuthToken, userAlias: string) {
-        try {
-            
-          const [newItems, hasMore] = await this.storyService.loadMoreFeedItems (
-            authToken,
-            userAlias,
-            PAGE_SIZE,
-            this.lastItem
-          );
-    
-          this.hasMoreItems = hasMore;
-          this.lastItem = newItems[newItems.length - 1];
-          this.view.addItems(newItems);
-        //   setChangedDisplayedUser(false)
-        } catch (error) {
-          this.view.displayErrorMessage(
-            `Failed to load feed items because of exception: ${error}`
-          );
-        }
-      };
+    // protected get view(): StatusItemView {
+    //   return super.view as StatusItemView;
+    // }
+
+    // public async loadMoreItems(authToken: AuthToken, userAlias: string) {
+    //   this.doFailureReportingOperation(async () => {          
+    //     const [newItems, hasMore] = await this.service.loadMoreFeedItems (
+    //     authToken,
+    //     userAlias,
+    //     PAGE_SIZE,
+    //     this.lastItem
+    //   );
+
+    //   this.hasMoreItems = hasMore;
+    //   this.lastItem = newItems[newItems.length - 1];
+    //   this.view.addItems(newItems);}, "load feed items")
+    //   };
 }

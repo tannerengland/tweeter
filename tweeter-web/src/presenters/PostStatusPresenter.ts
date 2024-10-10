@@ -1,21 +1,27 @@
 import { AuthToken, Status, User } from "tweeter-shared";
 import { StatusService } from "../model/service/StatusService";
+import { Presenter, View } from "./Presenter";
 
-export interface PostStatusView {
-    displayErrorMessage: (message: string) => void,
+export interface PostStatusView extends View {
+    // displayErrorMessage: (message: string) => void,
     setIsLoading: any,
     displayInfoMessage: (message: string, duration: number) => void,
     setPost: (value: React.SetStateAction<string>) => void,
     clearLastInfoMessage: () => void,
 }
 
-export class PostStatusPresenter {
+export class PostStatusPresenter extends Presenter<PostStatusView> {
     private statusService: StatusService;
-    private view: PostStatusView; 
+    // private view: PostStatusView; 
 
     public constructor(view: PostStatusView) {
-        this.statusService = new StatusService();
-        this.view = view;
+      // this.view = view;
+      super(view);
+      this.statusService = new StatusService();
+    }
+
+    protected get view(): PostStatusView {
+      return super.view as PostStatusView;
     }
 
     public async submitPost(authToken: AuthToken, post: string, currentUser: User | null) {
@@ -25,6 +31,7 @@ export class PostStatusPresenter {
         // await this.statusService.postStatus(authToken!, status);
 
         try {
+          this.doFailureReportingOperation(async () => {
             this.view.setIsLoading(true);
             this.view.displayInfoMessage("Posting status...", 0);
       
@@ -38,21 +45,15 @@ export class PostStatusPresenter {
       
             this.view.setPost("");
             this.view.displayInfoMessage("Status posted!", 2000);
-          } catch (error) {
-            // displayErrorMessage(
-            //   `Failed to post the status because of exception: ${error}`
-            // );
-            this.displayErrorMessage(error);
-          } finally {
-            this.view.clearLastInfoMessage();
-            this.view.setIsLoading(false);
-          }
+          }, "post the status")
+        } finally {
+          this.view.clearLastInfoMessage();
+          this.view.setIsLoading(false);
+        }
 
     };
 
-    public displayErrorMessage(error: unknown) {
-        this.view.displayErrorMessage(`Failed to post the status because of exception: ${error}`);
-    }
+
 
 
 

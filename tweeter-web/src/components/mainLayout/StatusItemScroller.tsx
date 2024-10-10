@@ -48,9 +48,18 @@ const StatusItemScroller = (props: Props) => {
     useEffect(() => {
       if(changedDisplayedUser) {
         loadMoreItems();
+        // setChangedDisplayedUser(false); 
       }
     }, [changedDisplayedUser]);
   // }, []);
+
+  // useEffect(() => {
+  //   if (changedDisplayedUser) {
+  //     loadMoreItems();
+  //     setChangedDisplayedUser(false); // Ensure this runs to allow subsequent loading of items
+  //   }
+  // }, [changedDisplayedUser]);
+  
 
   
     // Add new items whenever there are new items to add
@@ -85,7 +94,7 @@ const StatusItemScroller = (props: Props) => {
   
     const loadMoreItems = async () => {
       presenter.loadMoreItems(authToken!, displayedUser!.alias);
-      // THIS IS WHAT PREVENTS FROM LOADING
+      // THIS IS WHAT PREVENTS FROM LOADING UNTIL SCROLL
       // setChangedDisplayedUser(false);
 
 
