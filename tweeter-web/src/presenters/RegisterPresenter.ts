@@ -1,57 +1,53 @@
 import { User, AuthToken } from "tweeter-shared";
-import { UserService } from "../model/service/UserService";
+// import { UserService } from "../model/service/UserService";
 import { Buffer } from "buffer";
-import { Presenter, View } from "./Presenter";
+// import { View } from "./Presenter";
+import { AuthenticatePresenter, AuthenticateView } from "./AuthenticatePresenter";
 
 
-export interface RegisterView extends View {
-    authenticate: (currentUser: User, authToken: AuthToken) => void;
-    navigateTo: (url: string) => void;
-    // displayErrorMessage: (message: string) => void;
+export interface RegisterView extends AuthenticateView {
     setImageUrl: (value: React.SetStateAction<string>) => void;
     setImageBytes: (value: React.SetStateAction<Uint8Array>) => void;
     setImageFileExtension: (value: React.SetStateAction<string>) => void;
-
 }
 
-export class RegisterPresenter extends Presenter<RegisterView>{
+export class RegisterPresenter extends AuthenticatePresenter {
 
-    private setIsLoading = false;
+    // private setIsLoading = false;
 
-    private userService: UserService;
-    // private view: RegisterView;
+    // private userService: UserService;
 
     public constructor(view: RegisterView) {
-      // this.view = view;
       super(view);
-      this.userService = new UserService();
+      // this.userService = new UserService();
     }
 
     protected get view(): RegisterView {
       return super.view as RegisterView;
     }
 
-    public async doRegister(firstName: string, lastName: string, alias: string, password: string, imageBytes: Uint8Array, imageFileExtension: string) {
-      try {
-        this.doFailureReportingOperation(async () => {
-          this.setIsLoading = true;
-      
-          const [user, authToken] = await this.userService.register(
-            firstName,
-            lastName,
-            alias,
-            password,
-            imageBytes,
-            imageFileExtension
-          );
-    
-          this.view.authenticate(user, authToken);
-          this.view.navigateTo("/");
-        }, "register user");
-      } finally {
-        this.setIsLoading = false;
-      }
-    };
+    public doRegister(firstName: string, lastName: string, alias: string, password: string, imageBytes: Uint8Array, imageFileExtension: string): Promise<void> {
+      return this.doAuthenticate(() => this.service.register(firstName, lastName, alias, password, imageBytes, imageFileExtension), () => this.getNavigationFunction()) 
+    }
+
+    // protected doOperation(firstName: string, lastName: string, alias: string, password: string, imageBytes: Uint8Array, imageFileExtension: string): Promise<[User, AuthToken]> {
+    //   return this.service.register(
+    //     firstName,
+    //     lastName,
+    //     alias,
+    //     password,
+    //     imageBytes,
+    //     imageFileExtension
+    //   );
+    // }
+
+    protected getOperationDescription(): string {
+      return "register user";
+    }
+
+    protected getNavigationFunction(): void {
+      return  this.view.navigateTo("/");
+    }
 
       public handleImageFile (file: File | undefined)  {
         if (file) {
@@ -88,5 +84,24 @@ export class RegisterPresenter extends Presenter<RegisterView>{
       public getFileExtension (file: File): string | undefined {
         return file.name.split(".").pop();
       };
+
+          // public async doRegister(firstName: string, lastName: string, alias: string, password: string, imageBytes: Uint8Array, imageFileExtension: string) {
+    //     this.doFailureReportingWithPostTask(async () => {
+    //       this.setIsLoading = true;
+    //       const [user, authToken] = await this.userService.register(
+    //         firstName,
+    //         lastName,
+    //         alias,
+    //         password,
+    //         imageBytes,
+    //         imageFileExtension
+    //       );
+    
+    //       this.view.authenticate(user, authToken);
+    //       this.view.navigateTo("/");
+    //     }, "register user", () => {
+    //       this.setIsLoading = false;
+    //     });
+    // };
 
 }

@@ -20,7 +20,8 @@ const AppNavbar = () => {
     const listener: LogoutView = {
       displayErrorMessage: displayErrorMessage,
       clearLastInfoMessage: clearLastInfoMessage, 
-      clearUserInfo: clearUserInfo
+      clearUserInfo: clearUserInfo,
+      displayInfoMessage: displayInfoMessage
     }
     
     const [presenter] = useState(new LogoutPresenter(listener));

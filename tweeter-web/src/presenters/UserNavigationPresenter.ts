@@ -3,24 +3,18 @@ import { UserService } from "../model/service/UserService";
 import { Presenter, View } from "./Presenter";
 
 export interface UserNavigationView extends View {
-  displayErrorMessage: (message: string) => void;
   setDisplayedUser: (user: User) => void;
 }
 
 export class UserNavigationPresenter extends Presenter<UserNavigationView> {
 
     private userService: UserService;
-    // private view: UserNavigationView; 
 
     public constructor(view: UserNavigationView) {
-      // this.view = view;
       super(view);
       this.userService = new UserService();
     }
 
-    protected get view(): UserNavigationView {
-      return super.view as UserNavigationView;
-    }
 
     public async navigateToUser(authToken: AuthToken, alias: string, currentUser: User): Promise<void> {
 
@@ -36,7 +30,6 @@ export class UserNavigationPresenter extends Presenter<UserNavigationView> {
           }
         }, "get user")
 
-    
     };
 
     public extractAlias = (value: string): string => {

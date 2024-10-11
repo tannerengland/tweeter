@@ -1,69 +1,66 @@
 // import { useNavigate } from "react-router-dom";
 import { AuthToken, User } from "tweeter-shared";
 // import useUserInfo from "../components/userInfo/userInfoHook";
-import { UserService } from "../model/service/UserService";
-import { Presenter, View } from "./Presenter";
-import { UserItemView } from "./UserItemPresenter";
+// import { UserService } from "../model/service/UserService";
+import { AuthenticatePresenter, AuthenticateView } from "./AuthenticatePresenter";
+// import { View } from "./Presenter";
 
-export interface LoginView extends View {
-    // updateUserInfo: (currentUser: User, displayedUser: User | null, authToken: AuthToken, remember: boolean) => void;
-    authenticate: (currentUser: User, authToken: AuthToken) => void;
-    navigateTo: (url: string) => void;
-    // displayErrorMessage: (message: string) => void;
+// export interface LoginView extends AuthenticateView {
+//     // updateUserInfo: (currentUser: User, displayedUser: User | null, authToken: AuthToken, remember: boolean) => void;
+//     authenticate: (currentUser: User, authToken: AuthToken) => void;
+//     navigateTo: (url: string) => void;
+//     // displayErrorMessage: (message: string) => void;
 
-}
+// }
 
-export class LoginPresenter extends Presenter<LoginView> {
-    private setIsLoading = false;
-    // private updateUserInfo = useUserInfo();
-    // private navigate = useNavigate();
-    // private alias = "";
-    // private password = "";
-    // private rememberMe = false;
+export class LoginPresenter extends AuthenticatePresenter {
+    // private setIsLoading = false;
 
-    private userService: UserService;
-    // private view: LoginView;
+    // private userService: UserService;
 
-    public constructor(view: LoginView) {
-      super(view);
+    // public constructor(view: LoginView) {
+    //   super(view);
 
-      this.userService = new UserService();
-        // this.view = view;
-    }
-    
-    protected get view(): LoginView {
-      return super.view as LoginView;
+    //   this.userService = new UserService();
+    // }
+
+    public doLogin(alias: string, password: string, url: string | undefined): Promise<void>  {
+      return this.doAuthenticate(() => this.service.login(alias, password), () => this.getNavigationFunction(url))
     }
 
-    public async doLogin(alias: string, password: string, originalUrl?: string) {
-      try {
-        this.doFailureReportingOperation(async () => {
-          this.setIsLoading = true;
-      
-          const [user, authToken] = await this.userService.login(alias, password);
-    
-          this.view.authenticate(user, authToken);
-    
-          if (!!originalUrl) {
-            this.view.navigateTo(originalUrl);
-          } else {
-            this.view.navigateTo("/");
-          }
+    // protected doOperation(alias: string, password: string): Promise<[User, AuthToken]> {
+    //   return this.service.login(alias, password);
+    // }
 
-        }, "log user in");
-      } finally {
-        this.setIsLoading = false;
+    protected getOperationDescription(): string {
+      return "log user in";
+    }
+
+    protected getNavigationFunction(originalUrl: string | undefined): void {
+      if (!!originalUrl) {
+        return this.view.navigateTo(originalUrl);
+      } else {
+        return this.view.navigateTo("/");
       }
+    }
+    
 
+    // public async doLogin(alias: string, password: string, originalUrl?: string) {
+    //     this.doFailureReportingWithPostTask(async () => {
+    //       this.setIsLoading = true;
+      
+    //       const [user, authToken] = await this.userService.login(alias, password);
+    
+    //       this.view.authenticate(user, authToken);
+    
+    //       if (!!originalUrl) {
+    //         this.view.navigateTo(originalUrl);
+    //       } else {
+    //         this.view.navigateTo("/");
+    //       }
 
-        // try {
-
-        // } catch (error) {
-        //   this.view.displayErrorMessage(
-        //     `Failed to log user in because of exception: ${error}`
-        //   );
-        // } finally {
-        //   this.setIsLoading = false;
-        // }
-      };
+    //     }, "log user in", () => {
+    //       this.setIsLoading = false;
+    //     });
+    // };
 }

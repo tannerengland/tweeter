@@ -1,11 +1,9 @@
-import { User } from "tweeter-shared";
 
 export interface View {
     displayErrorMessage: (message: string) => void;
 }
 
-export interface MessageView {
-    displayErrorMessage: (message: string) => void;
+export interface MessageView extends View {
     displayInfoMessage: (message: string, duration: number) => void,
     clearLastInfoMessage: () => void,
 }
@@ -29,5 +27,18 @@ export class Presenter<V extends View> {
             `Failed to ${operationDescription} because of exception: ${error}`
           );
         }
-      }; 
+    }; 
+
+    public async doFailureReportingWithPostTask(operation: () => Promise<void>, operationDescription: string, operation2: () => any): Promise<void> {
+      try {
+        await operation();
+      } catch (error) {
+        this.view.displayErrorMessage(
+          `Failed to ${operationDescription} because of exception: ${error}`
+        );
+      } finally {
+        operation2();
+      }
+  }; 
+
 }

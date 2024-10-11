@@ -3,8 +3,6 @@ import { FollowService } from "../model/service/FollowService";
 import { PagedItemPresenter } from "./PagedItemPresenter";
 import { View } from "./Presenter";
 
-// export const PAGE_SIZE = 10;
-
 export interface UserItemView extends View {
     addItems: (newItems: User[]) => void;
 }

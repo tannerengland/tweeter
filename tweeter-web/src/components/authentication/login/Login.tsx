@@ -9,7 +9,8 @@ import { AuthToken, User } from "tweeter-shared";
 import useToastListener from "../../toaster/ToastListenerHook";
 import AuthenticationFields from "../AuthenticationFields";
 import useUserInfo from "../../userInfo/userInfoHook";
-import { LoginPresenter, LoginView } from "../../../presenters/LoginPresenter";
+import { LoginPresenter } from "../../../presenters/LoginPresenter";
+import { AuthenticateView } from "../../../presenters/AuthenticatePresenter";
 
 interface Props {
   originalUrl?: string;
@@ -35,7 +36,7 @@ const Login = (props: Props) => {
     }
   };
 
-  const listener: LoginView = {
+  const listener: AuthenticateView = {
     authenticate: (user: User, authToken: AuthToken) => {updateUserInfo(user, user, authToken, rememberMe)},
     navigateTo: (url: string) => {navigate(url)},
     displayErrorMessage: displayErrorMessage,

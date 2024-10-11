@@ -3,7 +3,6 @@ import { StatusService } from "../model/service/StatusService";
 import { PagedItemPresenter } from "./PagedItemPresenter";
 import { View } from "./Presenter";
 
-// export const PAGE_SIZE = 10;
 
 export interface StatusItemView extends View {
     addItems: (newItems: Status[]) => void;
