@@ -8,7 +8,6 @@ export interface UserInfoView extends MessageView {
     setIsFollower: (value: React.SetStateAction<boolean>) => void,
     setFollowerCount: (value: React.SetStateAction<number>) => void,
     setFolloweeCount: (value: React.SetStateAction<number>) => void,
-
 }
 
 export class UserInfoPresenter extends Presenter<UserInfoView> {
