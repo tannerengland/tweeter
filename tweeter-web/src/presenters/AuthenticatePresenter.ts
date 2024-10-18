@@ -29,7 +29,7 @@ export abstract class AuthenticatePresenter extends Presenter<AuthenticateView> 
     }
 
     protected async doAuthenticate(authOperation: () => Promise<[User, AuthToken]>, navOperation: () => void) {
-        this.doFailureReportingWithPostTask(async () => {
+        await this.doFailureReportingWithPostTask(async () => {
             this.setIsLoading = true;
             const [user, authToken] = await authOperation();
 

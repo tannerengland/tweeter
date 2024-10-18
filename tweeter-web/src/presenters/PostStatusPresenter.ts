@@ -11,16 +11,35 @@ export interface PostStatusView extends MessageView {
 }
 
 export class PostStatusPresenter extends Presenter<PostStatusView> {
-    private statusService: StatusService;
+    private _statusService: StatusService | null = null;
+
+    // private _statusService: StatusService;
+    
+
+    // public constructor(view: PostStatusView) {
+    //   super(view);
+    //   this._statusService = new StatusService();
+    // }
+
+    // public get statusService() {
+    //   return this._statusService;
+    // }
 
     public constructor(view: PostStatusView) {
       super(view);
-      this.statusService = new StatusService();
+      // this._statusService = new StatusService();
+    }
+
+    public get statusService() {
+      if (this._statusService == null) {
+        this._statusService = new StatusService();
+      }
+      return this._statusService;
     }
 
     public async submitPost(authToken: AuthToken, post: string, currentUser: User | null) {
 
-          this.doFailureReportingWithPostTask(async () => {
+          await this.doFailureReportingWithPostTask(async () => {
             this.view.setIsLoading(true);
             this.view.displayInfoMessage("Posting status...", 0);
       
@@ -30,14 +49,18 @@ export class PostStatusPresenter extends Presenter<PostStatusView> {
       
             this.view.setPost("");
             this.view.displayInfoMessage("Status posted!", 2000);
+            // this.view.clearLastInfoMessage();
+
+            // this.view.clearLastInfoMessage();
+            // this.view.setIsLoading(false);
+
+
           }, "post the status", () => {
+            // console.log("finally block")
             this.view.clearLastInfoMessage();
             this.view.setIsLoading(false);
-          })
+          }
+          )
     };
-
-
-
-
 
 }

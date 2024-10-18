@@ -1,8 +1,8 @@
 // import { useNavigate } from "react-router-dom";
-import { AuthToken, User } from "tweeter-shared";
+// import { AuthToken, User } from "tweeter-shared";
 // import useUserInfo from "../components/userInfo/userInfoHook";
 // import { UserService } from "../model/service/UserService";
-import { AuthenticatePresenter, AuthenticateView } from "./AuthenticatePresenter";
+import { AuthenticatePresenter } from "./AuthenticatePresenter";
 // import { View } from "./Presenter";
 
 // export interface LoginView extends AuthenticateView {
@@ -12,6 +12,10 @@ import { AuthenticatePresenter, AuthenticateView } from "./AuthenticatePresenter
 //     // displayErrorMessage: (message: string) => void;
 
 // }
+
+// inheritance: user info view extends message view to reduce the need to include displayErrorMessage, displayInfoMessage, clearLastInfoMessage in all classes
+// generics: paged item presenter allows us to exchange easily between statuses and users while maintaining structure. Same with services (since one will be in status service and other in user)
+// functions as parameters : HERE. this allows for us to use different nav functions and service calls while maintaining the structure of the code
 
 export class LoginPresenter extends AuthenticatePresenter {
     // private setIsLoading = false;

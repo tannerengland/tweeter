@@ -22,7 +22,7 @@ export class UserInfoPresenter extends Presenter<UserInfoView> {
         authToken: AuthToken, displayedUser: User
       ): Promise<void> {
     
-          this.doFailureReportingWithPostTask(async () => {
+          await this.doFailureReportingWithPostTask(async () => {
             this.view.setIsLoading(true);
             this.view.displayInfoMessage(
               `Unfollowing ${displayedUser!.name}...`,
@@ -69,7 +69,7 @@ export class UserInfoPresenter extends Presenter<UserInfoView> {
       ): Promise<void> {
         // event.preventDefault();
     
-          this.doFailureReportingWithPostTask(async () => {
+          await this.doFailureReportingWithPostTask(async () => {
             this.view.setIsLoading(true);
             this.view.displayInfoMessage(`Following ${displayedUser!.name}...`, 0);
       

@@ -3,19 +3,19 @@ import { UserService } from "../model/service/UserService";
 import { MessageView, Presenter, View } from "./Presenter";
 
 
-export interface LogoutView extends MessageView  {
+export interface AppNavbarView extends MessageView  {
     clearUserInfo: () => void,
 }
 
 
-export class LogoutPresenter extends Presenter<LogoutView> {
+export class AppNavbarPresenter extends Presenter<AppNavbarView> {
 
-    private userService: UserService;
+    private _userService: UserService;
     // private view: LogoutView; 
 
-    public constructor(view: LogoutView) {
+    public constructor(view: AppNavbarView) {
         super(view);
-        this.userService = new UserService();
+        this._userService = new UserService();
         // this.view = view;
     }
 
@@ -23,9 +23,12 @@ export class LogoutPresenter extends Presenter<LogoutView> {
     //     return super.view as LogoutView;
     // }
 
+    public get userService() {
+        return this._userService;
+    }
 
-    public async logOut(authToken: AuthToken)  {
-        // displayInfoMessage("Logging Out...", 0);
+    public async logout(authToken: AuthToken)  {
+        this.view.displayInfoMessage("Logging Out...", 0);
 
         this.doFailureReportingOperation(async () => {
             await this.userService.logout(authToken!);

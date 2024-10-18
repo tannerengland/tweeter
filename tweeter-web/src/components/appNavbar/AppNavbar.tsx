@@ -7,7 +7,7 @@ import Image from "react-bootstrap/Image";
 import { AuthToken } from "tweeter-shared";
 import useToastListener from "../toaster/ToastListenerHook";
 import useUserInfo from "../userInfo/userInfoHook";
-import { LogoutPresenter, LogoutView } from "../../presenters/LogoutPresenter";
+import { AppNavbarPresenter, AppNavbarView } from "../../presenters/AppNavbarPresenter";
 import { useState } from "react";
 
 const AppNavbar = () => {
@@ -17,22 +17,22 @@ const AppNavbar = () => {
     useToastListener();
 
 
-    const listener: LogoutView = {
+    const listener: AppNavbarView = {
       displayErrorMessage: displayErrorMessage,
       clearLastInfoMessage: clearLastInfoMessage, 
       clearUserInfo: clearUserInfo,
       displayInfoMessage: displayInfoMessage
     }
     
-    const [presenter] = useState(new LogoutPresenter(listener));
+    const [presenter] = useState(new AppNavbarPresenter(listener));
 
   const logOut = async () => {
-    displayInfoMessage("Logging Out...", 0);
+    // displayInfoMessage("Logging Out...", 0);
 
     // try {
 
 
-      await presenter.logOut(authToken!);
+      await presenter.logout(authToken!);
 
       // clearLastInfoMessage();
       // clearUserInfo();

@@ -2,12 +2,16 @@ import "./PostStatus.css";
 import { useState } from "react";
 // import { useContext } from "react";
 // import { UserInfoContext } from "../userInfo/UserInfoProvider";
-import { AuthToken, Status } from "tweeter-shared";
+// import { AuthToken, Status } from "tweeter-shared";
 import useToastListener from "../toaster/ToastListenerHook";
 import useUserInfo from "../userInfo/userInfoHook";
 import { PostStatusPresenter, PostStatusView } from "../../presenters/PostStatusPresenter";
 
-const PostStatus = () => {
+interface Props {
+  presenter?: PostStatusPresenter;
+}
+
+const PostStatus = (props: Props) => {
   const { displayErrorMessage, displayInfoMessage, clearLastInfoMessage } =
     useToastListener();
 
@@ -23,7 +27,7 @@ const PostStatus = () => {
     clearLastInfoMessage: clearLastInfoMessage,
   }
 
-  const [presenter] = useState(new PostStatusPresenter(listener));
+  const [presenter] = useState(props.presenter ?? new PostStatusPresenter(listener));
 
 
   const submitPost = async (event: React.MouseEvent) => {
@@ -81,6 +85,7 @@ const PostStatus = () => {
           <textarea
             className="form-control"
             id="postStatusTextArea"
+            aria-label="statusField"
             rows={10}
             placeholder="What's on your mind?"
             value={post}
