@@ -1,0 +1,6 @@
+BUCKET='cs340tannerengland'
+LAMBDA_ROLE='arn:aws:iam::194722415156:role/cs340project'
+EDIT_LAMBDALIST='
+tweeterGetFollowees | lambda/follow/GetFolloweesLambda.handler
+'
+LAMBDALAYER_ARN='arn:aws:lambda:us-east-2:194722415156:layer:tweeterLambdaLayer:2'
