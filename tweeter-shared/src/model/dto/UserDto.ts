@@ -4,3 +4,4 @@ export interface UserDto {
     readonly alias: string,
     readonly imageUrl: string
 }
+
