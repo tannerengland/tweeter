@@ -191,6 +191,8 @@ import {
   TweeterResponse,
   User,
   UserDto,
+  GetIsFollowerStatusRequest, 
+  GetIsFollowerStatusResponse
 } from "tweeter-shared";
 import { ClientCommunicator } from "./ClientCommunicator";
 
@@ -300,5 +302,17 @@ export class ServerFacade {
     });
   }
 
-  
+  public async getIsFollowerStatus(request: GetIsFollowerStatusRequest): Promise<boolean> {
+    const response = await this.clientCommunicator.doPost<
+    GetIsFollowerStatusRequest,
+      GetIsFollowerStatusResponse
+    >(request, "/following/status");
+
+    // Handle errors
+    return this.handleErrors(response, () => {
+      return response.isFollower;
+    });
+  }
+
+
 }
