@@ -85,7 +85,7 @@ export class RegisterPresenter extends AuthenticatePresenter {
         return file.name.split(".").pop();
       };
 
-          // public async doRegister(firstName: string, lastName: string, alias: string, password: string, imageBytes: Uint8Array, imageFileExtension: string) {
+    // public async doRegister(firstName: string, lastName: string, alias: string, password: string, imageBytes: Uint8Array, imageFileExtension: string) {
     //     this.doFailureReportingWithPostTask(async () => {
     //       this.setIsLoading = true;
     //       const [user, authToken] = await this.userService.register(

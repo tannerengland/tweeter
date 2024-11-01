@@ -1,12 +1,12 @@
+import { StatusService } from "../../model/service/StatusService";
+import { PostStatusRequest } from "tweeter-shared"
+import { TweeterResponse } from "tweeter-shared/dist/model/net/response/TweeterResponse";
 
-
-export const handler = async (request: PostItemRequest): Promise<PostItemResponse> => {
+export const handler = async (request: PostStatusRequest): Promise<TweeterResponse> => {
     const statusService = new StatusService;
-    const [items, hasMore] = await statusService.loadMoreFeedItems(request.token, request.userAlias, request.pageSize, request.lastItem);
+    await statusService.postStatus(request.token, request.newStatus);
     return {
         success: true,
-        message: null,
-        items: items,
-        hasMore: hasMore
+        message: null
     }
 }
