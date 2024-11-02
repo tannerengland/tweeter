@@ -39,7 +39,7 @@ export class FollowService {
 
       public async getFolloweeCount (
         authToken: AuthToken,
-        user: User
+        user: UserDto
       ): Promise<number> {
         // TODO: Replace with the result of calling server
         return FakeData.instance.getFolloweeCount(user.alias);
@@ -48,9 +48,10 @@ export class FollowService {
 
       public async getFollowerCount (
         authToken: AuthToken,
-        user: User
+        user: UserDto
       ): Promise<number> {
         // TODO: Replace with the result of calling server
+
         return FakeData.instance.getFollowerCount(user.alias);
       };
 

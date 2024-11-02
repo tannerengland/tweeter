@@ -1,4 +1,4 @@
-import { PagedUserItemResponse } from "tweeter-shared";
+import { GetIsFollowerStatusResponse } from "tweeter-shared";
 import { GetIsFollowerStatusRequest } from "tweeter-shared";
 import { FollowService } from "../../model/service/FollowService";
 

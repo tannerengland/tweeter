@@ -192,7 +192,9 @@ import {
   User,
   UserDto,
   GetIsFollowerStatusRequest, 
-  GetIsFollowerStatusResponse
+  GetIsFollowerStatusResponse,
+  GetFollowCountRequest,
+  GetFollowCountResponse
 } from "tweeter-shared";
 import { ClientCommunicator } from "./ClientCommunicator";
 
@@ -313,6 +315,31 @@ export class ServerFacade {
       return response.isFollower;
     });
   }
+
+  public async getFolloweeCount(request: GetFollowCountRequest): Promise<number> {
+    const response = await this.clientCommunicator.doPost<
+      GetFollowCountRequest,
+      GetFollowCountResponse
+    >(request, "/followee/count");
+
+    // Handle errors
+    return this.handleErrors(response, () => {
+      return response.followCount;
+    });
+  }
+
+  public async getFollowerCount(request: GetFollowCountRequest): Promise<number> {
+    const response = await this.clientCommunicator.doPost<
+      GetFollowCountRequest,
+      GetFollowCountResponse
+    >(request, "/follower/count");
+
+    // Handle errors
+    return this.handleErrors(response, () => {
+      return response.followCount;
+    });
+  }
+
 
 
 }
