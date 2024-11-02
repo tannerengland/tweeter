@@ -17,7 +17,9 @@ export type { PagedStatusItemRequest } from "./model/net/request/PagedStatusItem
 export type { PostStatusRequest } from "./model/net/request/PostStatusRequest";
 export type { GetIsFollowerStatusRequest } from "./model/net/request/GetIsFollowerStatusRequest";
 export type { GetFollowCountRequest } from "./model/net/request/GetFollowCountRequest";
-
+export type { FollowRequest } from "./model/net/request/FollowRequest";
+export type { UnfollowRequest } from "./model/net/request/UnfollowRequest";
+export type { GetUserRequest } from "./model/net/request/GetUserRequest";
 
 
 // Responses
@@ -26,10 +28,8 @@ export type { PagedUserItemResponse } from "./model/net/response/PagedUserItemRe
 export type { PagedStatusItemResponse } from "./model/net/response/PagedStatusItemResponse";
 export type { GetIsFollowerStatusResponse } from "./model/net/response/GetIsFollowerStatusResponse";
 export type { GetFollowCountResponse } from "./model/net/response/GetFollowCountResponse";
-
-
-// export type { PostStatusResponse } from "./model/net/response/PostStatusResponse";
-
+export type { XFollowResponse } from "./model/net/response/XFollowResponse";
+export type { GetUserResponse } from "./model/net/response/GetUserResponse";
 
 
 // Other

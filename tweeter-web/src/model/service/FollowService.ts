@@ -1,4 +1,5 @@
-import { AuthToken, User, FakeData, PagedUserItemRequest, GetIsFollowerStatusRequest, GetFollowCountRequest } from "tweeter-shared";
+// import { request } from "http";
+import { AuthToken, User, FakeData, PagedUserItemRequest, GetIsFollowerStatusRequest, GetFollowCountRequest, FollowRequest, UnfollowRequest } from "tweeter-shared";
 import { ServerFacade } from "../../network/ServerFacade";
 
 export class FollowService {
@@ -81,7 +82,6 @@ export class FollowService {
 
         // return this.currServerFacade.getFollowerCount(user.alias);
         return this.currServerFacade.getFollowerCount(request);
-
       };
 
       public async follow (
@@ -93,10 +93,16 @@ export class FollowService {
     
         // TODO: Call the server
     
-        const followerCount = await this.getFollowerCount(authToken, userToFollow);
-        const followeeCount = await this.getFolloweeCount(authToken, userToFollow);
+        // const followerCount = await this.getFollowerCount(authToken, userToFollow);
+        // const followeeCount = await this.getFolloweeCount(authToken, userToFollow);
     
-        return [followerCount, followeeCount];
+        // return [followerCount, followeeCount];
+        let request: FollowRequest = {
+          token: authToken.token,
+          userToFollow: userToFollow.dto
+        };
+
+        return this.currServerFacade.follow(request);
       };
 
 
@@ -109,9 +115,17 @@ export class FollowService {
     
         // TODO: Call the server
     
-        const followerCount = await this.getFollowerCount(authToken, userToUnfollow);
-        const followeeCount = await this.getFolloweeCount(authToken, userToUnfollow);
+        // const followerCount = await this.getFollowerCount(authToken, userToUnfollow);
+        // const followeeCount = await this.getFolloweeCount(authToken, userToUnfollow);
     
-        return [followerCount, followeeCount];
+        // return [followerCount, followeeCount];
+
+        let request: UnfollowRequest = {
+          token: authToken.token,
+          userToUnfollow: userToUnfollow.dto
+        };
+
+        return this.currServerFacade.unfollow(request);
+
       };
 }

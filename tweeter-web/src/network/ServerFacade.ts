@@ -194,7 +194,12 @@ import {
   GetIsFollowerStatusRequest, 
   GetIsFollowerStatusResponse,
   GetFollowCountRequest,
-  GetFollowCountResponse
+  GetFollowCountResponse,
+  FollowRequest,
+  XFollowResponse,
+  UnfollowRequest,
+  GetUserRequest,
+  GetUserResponse
 } from "tweeter-shared";
 import { ClientCommunicator } from "./ClientCommunicator";
 
@@ -337,6 +342,50 @@ export class ServerFacade {
     // Handle errors
     return this.handleErrors(response, () => {
       return response.followCount;
+    });
+  }
+
+  public async follow(request: FollowRequest): Promise<[followerCount: number, followeeCount: number]> {
+    const response = await this.clientCommunicator.doPost<
+      FollowRequest,
+      XFollowResponse
+    >(request, "/follow");
+
+    // Handle errors
+    return this.handleErrors(response, () => {
+      return [response.followerCount, response.followeeCount];
+    });
+  }
+
+  public async unfollow(request: UnfollowRequest): Promise<[followerCount: number, followeeCount: number]> {
+    const response = await this.clientCommunicator.doPost<
+      UnfollowRequest,
+      XFollowResponse
+    >(request, "/unfollow");
+
+    // Handle errors
+    return this.handleErrors(response, () => {
+      return [response.followerCount, response.followeeCount];
+    });
+  }
+
+  public async getUser(request: GetUserRequest): Promise<User | null> {
+    const response = await this.clientCommunicator.doPost<
+      GetUserRequest,
+      GetUserResponse
+    >(request, "/get/user");
+
+    const user: User | null = response.success && response.user
+      ? User.fromDto(response.user) as User
+      : null;
+
+    // Handle errors
+    return this.handleErrors(response, () => {
+      if (user == null) {
+        throw new Error(`No user found`);
+      } else {
+        return user;
+      }
     });
   }
 

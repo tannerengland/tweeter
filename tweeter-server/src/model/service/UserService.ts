@@ -1,9 +1,7 @@
-import { User, AuthToken, FakeData, GetUserRequest } from "tweeter-shared";
+import { User, AuthToken, FakeData, UserDto } from "tweeter-shared";
 import { Buffer } from "buffer";
-import { ServerFacade } from "../../network/ServerFacade";
 
 export class UserService {
-  private currServerFacade = new ServerFacade();
 
     public async login (
         alias: string,
@@ -42,17 +40,14 @@ export class UserService {
       };
 
       public async getUser (
-        authToken: AuthToken,
+        token: string,
         alias: string
-      ): Promise<User | null> {
+      ): Promise<UserDto | null> {
         // TODO: Replace with the result of calling server
-        // return FakeData.instance.findUserByAlias(alias);
-        let request: GetUserRequest = {
-          token: authToken.token,
-          alias: alias
-        };
 
-        return this.currServerFacade.getUser(request);
+        // return FakeData.instance.findUserByAlias(alias);
+        const user = FakeData.instance.findUserByAlias(alias);
+        return user ? user.dto : null;
       };
 
       public async logout (authToken: AuthToken): Promise<void> {
