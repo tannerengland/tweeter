@@ -199,7 +199,8 @@ import {
   XFollowResponse,
   UnfollowRequest,
   GetUserRequest,
-  GetUserResponse
+  GetUserResponse,
+  TweeterRequest
 } from "tweeter-shared";
 import { ClientCommunicator } from "./ClientCommunicator";
 
@@ -386,6 +387,18 @@ export class ServerFacade {
       } else {
         return user;
       }
+    });
+  }
+
+  public async logout(request: TweeterRequest): Promise<void> {
+    const response = await this.clientCommunicator.doPost<
+      TweeterRequest,
+      TweeterResponse
+    >(request, "/user/logout");
+
+    // Handle errors
+    this.handleErrors(response, () => {
+      // No additional success logic needed here
     });
   }
 
