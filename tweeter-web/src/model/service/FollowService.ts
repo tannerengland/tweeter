@@ -19,7 +19,7 @@ export class FollowService {
           pageSize: pageSize,
           lastItem: lastItem == null ? lastItem: lastItem.dto
         };
-        return this.currServerFacade.getMoreFollowers(request);
+        return await this.currServerFacade.getMoreFollowers(request);
       };
     
     public async loadMoreFollowees (
@@ -36,7 +36,7 @@ export class FollowService {
           pageSize: pageSize,
           lastItem: lastItem == null ? lastItem: lastItem.dto
         };
-        return this.currServerFacade.getMoreFollowees(request);
+        return await this.currServerFacade.getMoreFollowees(request);
       };
 
       public async getIsFollowerStatus (
@@ -51,7 +51,7 @@ export class FollowService {
           user: user.dto,
           selectedUser: selectedUser.dto
         };
-        return this.currServerFacade.getIsFollowerStatus(request);
+        return await this.currServerFacade.getIsFollowerStatus(request);
       };
 
       public async getFolloweeCount (
@@ -65,7 +65,7 @@ export class FollowService {
           user: user.dto
         };
 
-        return this.currServerFacade.getFolloweeCount(request);
+        return await this.currServerFacade.getFolloweeCount(request);
       };
 
 
@@ -81,7 +81,7 @@ export class FollowService {
         };
 
         // return this.currServerFacade.getFollowerCount(user.alias);
-        return this.currServerFacade.getFollowerCount(request);
+        return await this.currServerFacade.getFollowerCount(request);
       };
 
       public async follow (
@@ -89,7 +89,7 @@ export class FollowService {
         userToFollow: User
       ): Promise<[followerCount: number, followeeCount: number]> {
         // Pause so we can see the follow message. Remove when connected to the server
-        await new Promise((f) => setTimeout(f, 2000));
+        // await new Promise((f) => setTimeout(f, 2000));
     
         // TODO: Call the server
     
@@ -102,7 +102,7 @@ export class FollowService {
           userToFollow: userToFollow.dto
         };
 
-        return this.currServerFacade.follow(request);
+        return await this.currServerFacade.follow(request);
       };
 
 
@@ -111,7 +111,7 @@ export class FollowService {
         userToUnfollow: User
       ): Promise<[followerCount: number, followeeCount: number]> {
         // Pause so we can see the unfollow message. Remove when connected to the server
-        await new Promise((f) => setTimeout(f, 2000));
+        // await new Promise((f) => setTimeout(f, 2000));
     
         // TODO: Call the server
     
@@ -125,7 +125,7 @@ export class FollowService {
           userToUnfollow: userToUnfollow.dto
         };
 
-        return this.currServerFacade.unfollow(request);
+        return await this.currServerFacade.unfollow(request);
 
       };
 }

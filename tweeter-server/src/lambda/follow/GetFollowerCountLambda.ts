@@ -8,7 +8,7 @@ export const handler = async (request: GetFollowCountRequest): Promise<GetFollow
 
     return {
         success: true,
-        message: null,
+        message: undefined,
         followCount: followCount
     }
 }

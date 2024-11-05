@@ -20,7 +20,7 @@ export class StatusService {
           pageSize: pageSize,
           lastItem: lastItem == null ? lastItem: lastItem.dto
         };
-        return this.currServerFacade.getMoreStories(request);
+        return await this.currServerFacade.getMoreStories(request);
       };
     
       public async loadMoreFeedItems (
@@ -38,7 +38,7 @@ export class StatusService {
           pageSize: pageSize,
           lastItem: lastItem == null ? lastItem: lastItem.dto
         };
-        return this.currServerFacade.getMoreFeed(request);
+        return await this.currServerFacade.getMoreFeed(request);
       };
 
       public async postStatus (
@@ -54,6 +54,6 @@ export class StatusService {
           token: authToken.token,
           newStatus: newStatus.dto
         }
-        await this.currServerFacade.postStatus(request);
+        await await this.currServerFacade.postStatus(request);
       };
 }

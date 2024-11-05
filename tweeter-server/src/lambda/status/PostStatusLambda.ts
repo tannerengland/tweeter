@@ -7,6 +7,6 @@ export const handler = async (request: PostStatusRequest): Promise<TweeterRespon
     await statusService.postStatus(request.token, request.newStatus);
     return {
         success: true,
-        message: null
+        message: undefined
     }
 }

@@ -8,7 +8,7 @@ export const handler = async (request: GetIsFollowerStatusRequest): Promise<GetI
 
     return {
         success: true,
-        message: null,
+        message: undefined,
         isFollower: isFollower
     }
 }

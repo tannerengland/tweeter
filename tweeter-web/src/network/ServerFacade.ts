@@ -200,7 +200,12 @@ import {
   UnfollowRequest,
   GetUserRequest,
   GetUserResponse,
-  TweeterRequest
+  TweeterRequest,
+  LoginRequest,
+  LoginRegisterResponse,
+  AuthToken,
+  LogoutRequest,
+  RegisterRequest
 } from "tweeter-shared";
 import { ClientCommunicator } from "./ClientCommunicator";
 
@@ -390,7 +395,7 @@ export class ServerFacade {
     });
   }
 
-  public async logout(request: TweeterRequest): Promise<void> {
+  public async logout(request: LogoutRequest): Promise<void> {
     const response = await this.clientCommunicator.doPost<
       TweeterRequest,
       TweeterResponse
@@ -402,6 +407,53 @@ export class ServerFacade {
     });
   }
 
+  public async login(request: LoginRequest): Promise<[User, AuthToken]> {
+    const response = await this.clientCommunicator.doPost<
+      LoginRequest,
+      LoginRegisterResponse
+    >(request, "/user/login");
 
+    const user: User | null = response.success && response.user
+      ? User.fromDto(response.user) as User
+      : null;
+
+    const authToken: AuthToken = AuthToken.fromDto(response.authToken) as AuthToken;
+
+    // Handle errors
+    return this.handleErrors(response, () => {
+      if (user == null) {
+        throw new Error(`Invalid alias or password`);
+      } else {
+        return [user, authToken];
+      }
+    });
+  }
+
+  public async register(request: RegisterRequest): Promise<[User, AuthToken]> {
+    const response = await this.clientCommunicator.doPost<
+      RegisterRequest,
+      LoginRegisterResponse
+    >(request, "/user/register");
+
+    const user: User | null = response.success && response.user
+      ? User.fromDto(response.user) as User
+      : null;
+
+    const authToken: AuthToken = AuthToken.fromDto(response.authToken) as AuthToken;
+
+    // Handle errors
+    return this.handleErrors(response, () => {
+      if (user == null) {
+        throw new Error(`Invalid registration`);
+      } else {
+        return [user, authToken];
+      }
+    });
+  }
 
 }
+
+
+// make a request, make serverfacade, check the response (make sure it is there using expect(result.response, true) and expect(result.user.notToBeNull) )
+// if has more items = true than it should be 10 
+// another request if it has more items,

@@ -6,7 +6,7 @@ export const handler = async (request: GetUserRequest): Promise<GetUserResponse>
     const user = await userService.getUser(request.token, request.alias);
     return {
         success: true,
-        message: null,
+        message: undefined,
         user: user
     }
 }

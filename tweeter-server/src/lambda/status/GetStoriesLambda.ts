@@ -6,7 +6,7 @@ export const handler = async (request: PagedStatusItemRequest): Promise<PagedSta
     const [items, hasMore] = await statusService.loadMoreStoryItems(request.token, request.userAlias, request.pageSize, request.lastItem);
     return {
         success: true,
-        message: null,
+        message: undefined,
         items: items,
         hasMore: hasMore
     }

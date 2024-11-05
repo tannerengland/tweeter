@@ -1,4 +1,4 @@
-import { User, AuthToken, FakeData, GetUserRequest, TweeterRequest } from "tweeter-shared";
+import { User, AuthToken, FakeData, GetUserRequest, TweeterRequest, LoginRequest, LogoutRequest, RegisterRequest } from "tweeter-shared";
 import { Buffer } from "buffer";
 import { ServerFacade } from "../../network/ServerFacade";
 
@@ -16,7 +16,14 @@ export class UserService {
           throw new Error("Invalid alias or password");
         }
     
-        return [user, FakeData.instance.authToken];
+        // return [user, FakeData.instance.authToken];
+        let request: LoginRequest = {
+          alias: alias,
+          password: password
+        };
+
+
+        return await this.currServerFacade.login(request);
       };
 
       public async register (
@@ -37,8 +44,18 @@ export class UserService {
         if (user === null) {
           throw new Error("Invalid registration");
         }
+
+        let request: RegisterRequest = {
+          firstName: firstName,
+          lastName: lastName,
+          alias: alias,
+          password: password,
+          userImageBytes: imageStringBase64,
+          imageFileExtension: imageFileExtension
+        };
     
-        return [user, FakeData.instance.authToken];
+        // return [user, FakeData.instance.authToken];
+        return await this.currServerFacade.register(request);
       };
 
       public async getUser (
@@ -52,11 +69,11 @@ export class UserService {
           alias: alias
         };
 
-        return this.currServerFacade.getUser(request);
+        return await this.currServerFacade.getUser(request);
       };
 
       public async logout (authToken: AuthToken): Promise<void> {
-        let request: TweeterRequest = {
+        let request: LogoutRequest = {
           token: authToken.token
         }
         await this.currServerFacade.logout(request);

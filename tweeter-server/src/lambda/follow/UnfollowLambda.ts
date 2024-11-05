@@ -8,7 +8,7 @@ export const handler = async (request: UnfollowRequest): Promise<XFollowResponse
 
     return {
         success: true,
-        message: null,
+        message: undefined,
         followerCount: followerCount, 
         followeeCount: followeeCount
     }
