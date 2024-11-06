@@ -10,11 +10,11 @@ export class UserService {
         password: string
       ): Promise<[User, AuthToken]> {
         // TODO: Replace with the result of calling the server
-        const user = FakeData.instance.firstUser;
+        // const user = FakeData.instance.firstUser;
     
-        if (user === null) {
-          throw new Error("Invalid alias or password");
-        }
+        // if (user === null) {
+        //   throw new Error("Invalid alias or password");
+        // }
     
         // return [user, FakeData.instance.authToken];
         let request: LoginRequest = {
@@ -39,11 +39,11 @@ export class UserService {
           Buffer.from(userImageBytes).toString("base64");
     
         // TODO: Replace with the result of calling the server
-        const user = FakeData.instance.firstUser;
+        // const user = FakeData.instance.firstUser;
     
-        if (user === null) {
-          throw new Error("Invalid registration");
-        }
+        // if (user === null) {
+        //   throw new Error("Invalid registration");
+        // }
 
         let request: RegisterRequest = {
           firstName: firstName,
