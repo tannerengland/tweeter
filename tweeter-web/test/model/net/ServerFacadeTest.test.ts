@@ -67,3 +67,5 @@ describe("ServerFacade", () => {
 
     });
 });
+
+// functionality, tests, 2 end to end componenet presenter webservice serfacade clientcomm lambda serverservice
