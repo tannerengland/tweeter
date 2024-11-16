@@ -7,4 +7,3 @@ export interface StatusDto {
     readonly timestamp: number
 }
 
-// change segments here and in status

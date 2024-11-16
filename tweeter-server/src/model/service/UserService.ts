@@ -1,22 +1,65 @@
 import { User, AuthToken, FakeData, UserDto, AuthTokenDto } from "tweeter-shared";
 import { Buffer } from "buffer";
+import { DaoFactory } from "../dao/DaoFactory";
+// import bcrypt from 'bcryptjs';
+// import {SHA256} from "crypto-js";
+
 
 export class UserService {
+
+  private factory: DaoFactory = new DaoFactory();
+  private userDao = this.factory.createUserDao();
+  private sessionDao = this.factory.createSessionDao();
+  private s3Dao = this.factory.createS3Dao();
 
     public async login (
         alias: string,
         password: string
       ): Promise<[UserDto, AuthTokenDto]> {
         // TODO: Replace with the result of calling the server
-        const user = FakeData.instance.firstUser;
+        // const user = FakeData.instance.firstUser;
+
+        // let realPassword = await this.userDao.getUserPassword(alias);
+
+        // console.log("real PAssword" + realPassword);
+
+        // let user = await this.userDao.getUser(alias);
+
+        // const [user, realPassword] = await this.userDao.loginUser(alias);
+        const result = await this.userDao.loginUser(alias);
     
-        if (user === null) {
+    
+        if (result === null) {
           throw new Error("Invalid alias or password");
         }
 
-        const authToken = FakeData.instance.authToken;
-    
-        return [user.dto, authToken.dto];
+        const [ currUser, currPassword ] = result;
+
+        // hash the password passed in
+        // const hashedPassword = SHA256(password).toString();
+        if (password != currPassword) {
+          throw new Error("Invalid alias or password");
+        }
+
+        let auth = AuthToken.Generate();
+
+        // let authTokenDto: AuthTokenDto = {
+        //   token: AuthToken.gener,
+        //   timestamp: 1234
+        // }
+
+        // set expiration
+        auth.timestamp = auth.timestamp + 600000;
+
+        let currAuth = await this.sessionDao.createSession(alias, auth.dto);
+
+        if (currAuth === null) {
+          throw new Error("Unable to create session");
+        }
+
+        //SessionDao.createSession(alias, password) => authToken
+        //UserDao.getUser(alias) => user
+        return [currUser, currAuth];
       };
 
       public async register (
@@ -32,15 +75,74 @@ export class UserService {
         //   Buffer.from(userImageBytes).toString("base64");
     
         // TODO: Replace with the result of calling the server
-        const user = FakeData.instance.firstUser;
+
+
+        // const user = FakeData.instance.firstUser;
     
-        if (user === null) {
-          throw new Error("Invalid registration");
+        // if (user === null) {
+        //   throw new Error("Invalid registration");
+        // }
+
+        // const authToken = FakeData.instance.authToken;
+
+        // UserDao.createUser(user) => user
+        // SessionDao.createSession(alias, password) => authToken
+        
+        let imageUrl: string = await this.s3Dao.putImage(alias, userImageBytes);
+
+        let userDto: UserDto = {
+          firstName: firstName,
+          lastName: lastName,
+          alias: alias,
+          imageUrl: imageUrl
         }
 
-        const authToken = FakeData.instance.authToken;
+        // var bcrypt = require('bcryptjs');
+        // var salt = bcrypt.genSaltSync(10);
+        // var hash = this.hashPassword(password);
+        // var salt = bcrypt.genSaltSync(10);
+        // var hash = bcrypt.hashSync(password, salt);
 
-        return [user.dto, authToken.dto];
+        // let aliasCheck = await this.userDao.getUser(alias);
+
+        // if (aliasCheck != null) {
+        //   throw new Error("Alias already taken");
+        // }
+
+        // have createuser return a user or null
+
+        //cryptojs
+        // const CryptoJS = require("crypto-js");
+        // const hashedPassword = SHA256(password).toString();
+
+
+        let currUser = await this.userDao.registerUser(userDto, password);
+        // let currUser = await this.userDao.getUser(alias);
+
+        if (currUser === null) {
+          throw new Error("Invalid registration");
+          // delete s3
+        }
+
+
+        // pass in alias and authtoken
+        let auth = AuthToken.Generate();
+
+        // let authTokenDto: AuthTokenDto = {
+        //   token: AuthToken.gener,
+        //   timestamp: 1234
+        // }
+
+        // set expiration
+        auth.timestamp = auth.timestamp + 600000;
+
+        let currAuth = await this.sessionDao.createSession(alias, auth.dto);
+
+        if (currAuth === null) {
+          throw new Error("Unable to create session");
+        }
+
+        return [currUser, currAuth];
       };
 
       public async getUser (
@@ -48,17 +150,27 @@ export class UserService {
         alias: string
       ): Promise<UserDto | null> {
         // TODO: Replace with the result of calling server
+                
+        if (await this.sessionDao.verifySession(token) == false) {
+          throw new Error("Not authorized");
+        }
 
         // return FakeData.instance.findUserByAlias(alias);
-        const user = FakeData.instance.findUserByAlias(alias);
-        return user ? user.dto : null;
+
+        // const user: UserDto | null = await this.userDao.getUser(alias);
+
+        // return user ? user : null;
+        const user = await this.userDao.getUser(alias);
+        return user; // Directly return user or null
       };
 
       public async logout (token: string): Promise<void> {
         // Pause so we can see the logging out message. Delete when the call to the server is implemented.
         // await new Promise((res) => setTimeout(res, 1000));
 
+        await this.sessionDao.deleteSession(token);
       };
+
 
 
 }
