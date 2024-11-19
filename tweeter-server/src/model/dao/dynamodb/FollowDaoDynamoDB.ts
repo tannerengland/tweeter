@@ -10,7 +10,7 @@ import {
   } from "@aws-sdk/lib-dynamodb";
   import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { FollowDao } from "../FollowDao";
-import { DataPage } from "../DataPage";
+import { DataPage } from "../../util/DataPage";
 import { UserDaoDynamoDB } from "./UserDaoDynamoDB";
 import { DaoFactory } from "../DaoFactory";
 import { DaoFactoryDynamoDB } from "./DaoFactoryDynamoDB";
@@ -273,6 +273,39 @@ export class FollowDaoDynamoDB implements FollowDao {
             throw error;
         }
     }
+
+    public async getFollowers(userAlias: string): Promise<UserDto[]> {
+        const params = {
+            TableName: this.tableName,
+            IndexName: this.indexName,
+            KeyConditionExpression: `${this.followeeAlias} = :userAlias`,
+            ExpressionAttributeValues: {
+                ":userAlias": userAlias,
+            },
+        };
+    
+        const followers: UserDto[] = [];
+    
+        try {
+            const data = await this.client.send(new QueryCommand(params));
+    
+            if (data.Items) {
+                for (const item of data.Items) {
+                    // Fetch each user's details using UserDao and convert to UserDto
+                    const user = await this.userDao.getUser(item[this.followerAlias]);
+                    if (user) {
+                        followers.push(user);
+                    }
+                }
+            }
+    
+            return followers;
+        } catch (error) {
+            console.error("Error fetching followers:", error);
+            throw error;
+        }
+    }
+    
     
     
     

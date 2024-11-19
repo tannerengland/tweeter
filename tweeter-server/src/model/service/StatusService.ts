@@ -29,7 +29,6 @@ export class StatusService {
     this.followDao = this.factory.createFollowDao();
     this.storyDao= this.factory.createStoryDao();
     this.feedDao= this.factory.createFeedDao();
-
   }
   
 
@@ -67,8 +66,10 @@ export class StatusService {
       throw new Error("Not authorized");
     }
 
-    
-    return this.getFakeData(lastItem, pageSize);
+    let result = await this.feedDao.getFeedPage(userAlias, pageSize, lastItem);
+
+    return [result.values, result.hasMorePages];
+    // return this.getFakeData(lastItem, pageSize);
   };
 
   private async getFakeData(lastItem: StatusDto | null, pageSize: number): Promise<[StatusDto[], boolean]> {
@@ -93,9 +94,8 @@ export class StatusService {
 
     // await this.storyDao.postStory(newStatus);
     await this.storyDao.postStory(newStatus);
+    await this.feedDao.postFeed(newStatus);
 
-
-    
   };
 
 }

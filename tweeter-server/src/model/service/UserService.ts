@@ -134,7 +134,7 @@ export class UserService {
         // have createuser return a user or null
 
         //cryptojs
-        // // const CryptoJS = require("crypto-js");
+        // const CryptoJS = require("crypto-js");
         // const hashedPassword = SHA256(password).toString();
 
         // const salt = await genSalt(10);

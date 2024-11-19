@@ -11,7 +11,7 @@ import {
   } from "@aws-sdk/lib-dynamodb";
   import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { StoryDao } from "../StoryDao";
-import { DataPage } from "../DataPage";
+import { DataPage } from "../../util/DataPage";
 
 export class StoryDaoDynamoDB implements StoryDao {
     readonly tableName = "stories";

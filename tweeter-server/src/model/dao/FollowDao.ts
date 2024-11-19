@@ -1,5 +1,5 @@
 import { User, UserDto } from "tweeter-shared";
-import { DataPage } from "./DataPage";
+import { DataPage } from "../util/DataPage";
 
 export interface FollowDao {
     followUser: (userAlias: string, userToFollowAlias: string) => Promise<void>;
