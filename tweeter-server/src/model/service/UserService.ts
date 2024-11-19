@@ -1,16 +1,38 @@
 import { User, AuthToken, FakeData, UserDto, AuthTokenDto } from "tweeter-shared";
 import { Buffer } from "buffer";
 import { DaoFactory } from "../dao/DaoFactory";
+import { UserDao } from "../dao/UserDao";
+import { SessionDao } from "../dao/SessionDao";
+import { FollowDao } from "../dao/FollowDao";
+import { StoryDao } from "../dao/StoryDao";
+import { S3Dao } from "../dao/S3Dao";
 // import bcrypt from 'bcryptjs';
 // import {SHA256} from "crypto-js";
+// import {genSalt, hash} from "bcryptjs";
 
 
 export class UserService {
 
-  private factory: DaoFactory = new DaoFactory();
-  private userDao = this.factory.createUserDao();
-  private sessionDao = this.factory.createSessionDao();
-  private s3Dao = this.factory.createS3Dao();
+  // private factory: DaoFactory = new DaoFactory();
+  // private userDao = this.factory.createUserDao();
+  // private sessionDao = this.factory.createSessionDao();
+  // private s3Dao = this.factory.createS3Dao();
+  private factory: DaoFactory;
+  private userDao: UserDao;
+  private sessionDao: SessionDao;
+  private followDao: FollowDao;
+  private storyDao: StoryDao;
+  private s3Dao: S3Dao;
+
+
+  constructor(daoFactory: DaoFactory) {
+    this.factory = daoFactory;
+    this.userDao = this.factory.createUserDao();
+    this.sessionDao = this.factory.createSessionDao();
+    this.followDao = this.factory.createFollowDao();
+    this.storyDao = this.factory.createStoryDao();
+    this.s3Dao = this.factory.createS3Dao();
+  }
 
     public async login (
         alias: string,
@@ -112,9 +134,11 @@ export class UserService {
         // have createuser return a user or null
 
         //cryptojs
-        // const CryptoJS = require("crypto-js");
+        // // const CryptoJS = require("crypto-js");
         // const hashedPassword = SHA256(password).toString();
 
+        // const salt = await genSalt(10);
+        // const hashedPassword = await hash(password, salt);
 
         let currUser = await this.userDao.registerUser(userDto, password);
         // let currUser = await this.userDao.getUser(alias);
@@ -155,12 +179,17 @@ export class UserService {
           throw new Error("Not authorized");
         }
 
+        // console.log(await this.sessionDao.verifySession(token));
+        // console.log("alias passed into service "+alias);
+
         // return FakeData.instance.findUserByAlias(alias);
 
         // const user: UserDto | null = await this.userDao.getUser(alias);
 
         // return user ? user : null;
         const user = await this.userDao.getUser(alias);
+        // console.log("service user " + user)
+
         return user; // Directly return user or null
       };
 

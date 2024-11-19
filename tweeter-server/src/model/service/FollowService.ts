@@ -1,12 +1,27 @@
 import { UserDto } from "tweeter-shared";
 import { AuthToken, User, FakeData } from "tweeter-shared";
 import { DaoFactory } from "../dao/DaoFactory";
+import { DaoFactoryDynamoDB } from "../dao/dynamodb/DaoFactoryDynamoDB";
+import { FollowDao } from "../dao/FollowDao";
+import { SessionDao } from "../dao/SessionDao";
+import { UserDao } from "../dao/UserDao";
 
 export class FollowService {
-  private factory: DaoFactory = new DaoFactory();
-  private userDao = this.factory.createUserDao();
-  private sessionDao = this.factory.createSessionDao();
-  private followDao = this.factory.createFollowDao();
+  // private factory: DaoFactory = new DaoFactory();
+  private factory: DaoFactory;
+  private userDao: UserDao;
+  private sessionDao: SessionDao;
+  private followDao: FollowDao;
+
+
+  constructor(daoFactory: DaoFactory) {
+    this.factory = daoFactory;
+    this.userDao = this.factory.createUserDao();
+    this.sessionDao = this.factory.createSessionDao();
+    this.followDao = this.factory.createFollowDao();
+  }
+  
+
 
     public async loadMoreFollowers (
         token: string,
@@ -19,9 +34,13 @@ export class FollowService {
           throw new Error("Not authorized");
         }
 
+        const lastFollowerAlias = lastItem ? lastItem.alias : undefined;
+    
+        const result = await this.followDao.getPageOfFollowers(userAlias, pageSize, lastFollowerAlias);
+    
+        return [result.values, result.hasMorePages];
 
-
-        return this.getFakeData(lastItem, pageSize, userAlias);
+        // return this.getFakeData(lastItem, pageSize, userAlias);
       };
     
     public async loadMoreFollowees (
@@ -43,11 +62,11 @@ export class FollowService {
         // return this.getFakeData(lastItem, pageSize, userAlias);
       };
 
-  private async getFakeData(lastItem: any, pageSize: number, userAlias: string): Promise<[UserDto[], boolean]> {
-    const [items, hasMore] = FakeData.instance.getPageOfUsers(User.fromDto(lastItem), pageSize, userAlias);
-    const dtos = items.map((user: User) => user.dto);
-    return [dtos, hasMore];
-  }
+  // private async getFakeData(lastItem: any, pageSize: number, userAlias: string): Promise<[UserDto[], boolean]> {
+  //   const [items, hasMore] = FakeData.instance.getPageOfUsers(User.fromDto(lastItem), pageSize, userAlias);
+  //   const dtos = items.map((user: User) => user.dto);
+  //   return [dtos, hasMore];
+  // }
 
       public async getIsFollowerStatus (
         token: string,
@@ -60,9 +79,9 @@ export class FollowService {
         }
 
 
-        // return await this.followDao.getIsFollowerStatus(user.alias, selectedUser.alias);
+        return await this.followDao.getIsFollowerStatus(user.alias, selectedUser.alias);
 
-        return FakeData.instance.isFollower();
+        // return FakeData.instance.isFollower();
       };
 
       public async getFolloweeCount (

@@ -41,6 +41,8 @@ export class UserDaoDynamoDB implements UserDao {
             TableName: this.tableName,
             Key: { [this.alias]: alias }, // Ensure correct key setup
         };
+
+        // console.log("alias passed into dao " + alias)
         
         try {
             const output = await this.client.send(new GetCommand(params));
@@ -57,6 +59,8 @@ export class UserDaoDynamoDB implements UserDao {
                 output.Item[this.alias],
                 output.Item[this.imageUrl]
             ).dto;
+
+            // console.log("dao " + user);
     
             return user; // Return the UserDto
         } catch (error) {

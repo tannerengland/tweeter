@@ -31,9 +31,9 @@ const useUserNavigationListener = (): UserNavigationListener => {
         event.preventDefault();
     
         // try {
-          const alias = presenter.extractAlias(event.target.toString());
+        const alias = presenter.extractAlias(event.target.toString());
 
-          await presenter.navigateToUser(authToken!, alias, currentUser!)
+        await presenter.navigateToUser(authToken!, alias, currentUser!)
     
           // const user = await getUser(authToken!, alias);
     
@@ -48,7 +48,7 @@ const useUserNavigationListener = (): UserNavigationListener => {
         //   // displayErrorMessage(`Failed to get user because of exception: ${error}`);
         //   presenter.displayErrorMessage(error);
         // }
-      };
+    };
     
       // const extractAlias = (value: string): string => {
       //   const index = value.indexOf("@");

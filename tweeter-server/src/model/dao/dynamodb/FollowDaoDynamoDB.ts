@@ -13,6 +13,7 @@ import { FollowDao } from "../FollowDao";
 import { DataPage } from "../DataPage";
 import { UserDaoDynamoDB } from "./UserDaoDynamoDB";
 import { DaoFactory } from "../DaoFactory";
+import { DaoFactoryDynamoDB } from "./DaoFactoryDynamoDB";
 
 export class FollowDaoDynamoDB implements FollowDao {
     readonly tableName = "follows";
@@ -25,7 +26,7 @@ export class FollowDaoDynamoDB implements FollowDao {
     // readonly followerLastName = "follower_last_name";
     // readonly followerImageUrl = "follower_image";
     // readonly followeeImageUrl = "followee_image";
-    private factory: DaoFactory = new DaoFactory();
+    private factory: DaoFactoryDynamoDB = new DaoFactoryDynamoDB();
     private userDao = this.factory.createUserDao();
 
 
@@ -227,6 +228,53 @@ export class FollowDaoDynamoDB implements FollowDao {
             throw error; // Rethrow error to let the calling function handle it
         }
     }
+
+    public async getPageOfFollowers(
+        followeeAlias: string, 
+        pageSize: number, 
+        lastFollowerAlias?: string
+    ): Promise<DataPage<UserDto>> {
+        const params = {
+            KeyConditionExpression: this.followeeAlias + " = :loc",
+            ExpressionAttributeValues: {
+              ":loc": followeeAlias,
+            },
+            TableName: this.tableName,
+            IndexName: this.indexName,
+            Limit: pageSize,
+            ExclusiveStartKey:
+            lastFollowerAlias === undefined
+                ? undefined
+                : {
+                    [this.followerAlias]: lastFollowerAlias,
+                    [this.followeeAlias]: followeeAlias,
+                  },
+          };
+    
+        const items: UserDto[] = [];
+    
+        try {
+            const data = await this.client.send(new QueryCommand(params));
+            const hasMorePages = data.LastEvaluatedKey !== undefined;
+    
+            if (data.Items) {
+                for (const item of data.Items) {
+                    const user = await this.userDao.getUser(item[this.followerAlias]); // Fetch user info
+                    if (user) {
+                        items.push(user);
+                    }
+                }
+            }
+    
+            return new DataPage<UserDto>(items, hasMorePages);
+    
+        } catch (error) {
+            console.error("Error fetching followers:", error);
+            throw error;
+        }
+    }
+    
+    
     
 
 }

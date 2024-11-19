@@ -1,8 +1,9 @@
 import { PagedStatusItemRequest, PagedStatusItemResponse } from "tweeter-shared";
+import { DaoFactoryDynamoDB } from "../../model/dao/dynamodb/DaoFactoryDynamoDB";
 import { StatusService } from "../../model/service/StatusService";
 
 export const handler = async (request: PagedStatusItemRequest): Promise<PagedStatusItemResponse> => {
-    const statusService = new StatusService();
+    const statusService = new StatusService(new DaoFactoryDynamoDB);
     const [items, hasMore] = await statusService.loadMoreFeedItems(request.token, request.userAlias, request.pageSize, request.lastItem);
     return {
         success: true,

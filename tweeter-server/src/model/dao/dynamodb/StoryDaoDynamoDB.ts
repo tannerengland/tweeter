@@ -157,60 +157,113 @@ export class StoryDaoDynamoDB implements StoryDao {
 
     // }
 
-    public async getStoriesPage(author_alias: string, pageSize: number, lastItem: StatusDto | null): Promise<DataPage<StatusDto>> {
-      const params = {
-          TableName: this.tableName,
-          KeyConditionExpression: `${this.author_alias} = :author_alias`,
-          ExpressionAttributeValues: {
-              ":author_alias": author_alias,
-          },
-          Limit: pageSize,
-          ExclusiveStartKey: lastItem
-              ? {
-                  [this.author_alias]: lastItem.user.alias,
-                  [this.timestamp]: lastItem.timestamp,
-              }
-              : undefined,
-      };
+//     public async getStoriesPage(author_alias: string, pageSize: number, lastItem: StatusDto | null): Promise<DataPage<StatusDto>> {
+//       const params = {
+//           TableName: this.tableName,
+//           KeyConditionExpression: `${this.author_alias} = :author_alias`,
+//           ExpressionAttributeValues: {
+//               ":author_alias": author_alias,
+//           },
+//           Limit: pageSize,
+//           ExclusiveStartKey: lastItem
+//               ? {
+//                   [this.author_alias]: lastItem.user.alias,
+//                   [this.timestamp]: lastItem.timestamp,
+//               }
+//               : undefined,
+//       };
   
-      const items: StatusDto[] = [];
-      console.log("Query parameters:", params); // Debug log
+//       const items: StatusDto[] = [];
+//       console.log("Query parameters:", params); // Debug log
   
-      try {
-          const data = await this.client.send(new QueryCommand(params));
-          console.log("Fetched items:", data.Items); // Debug log
-          const hasMorePages = data.LastEvaluatedKey !== undefined;
+//       try {
+//           const data = await this.client.send(new QueryCommand(params));
+//           console.log("Fetched items:", data.Items); // Debug log
+//           const hasMorePages = data.LastEvaluatedKey !== undefined;
   
-          data.Items?.forEach((item) => {
-              const currUser = new User(
-                  item[this.firstName],
-                  item[this.lastName],
-                  item[this.author_alias],
-                  item[this.imageUrl]
-              );
+//           data.Items?.forEach((item) => {
+//               const currUser = new User(
+//                   item[this.firstName],
+//                   item[this.lastName],
+//                   item[this.author_alias],
+//                   item[this.imageUrl]
+//               );
   
-              items.push(
-                  new Status(
-                      item[this.post],
-                      currUser,
-                      item[this.timestamp]
-                  ).dto
-              );
-          });
+//               items.push(
+//                   new Status(
+//                       item[this.post],
+//                       currUser,
+//                       item[this.timestamp]
+//                   ).dto
+//               );
+//           });
   
-          // Deduplicate items
-          // const uniqueItems = Array.from(
-          //     new Map(
-          //         items.map((item) => [`${item.user.alias}-${item.timestamp}`, item])
-          //     ).values()
-          // );
+//           // Deduplicate items
+//           // const uniqueItems = Array.from(
+//           //     new Map(
+//           //         items.map((item) => [`${item.user.alias}-${item.timestamp}`, item])
+//           //     ).values()
+//           // );
   
-          return new DataPage<StatusDto>(items, hasMorePages);
-      } catch (error) {
-          console.error("Error fetching stories:", error);
-          throw error; // Rethrow error to let calling function handle it
-      }
-  }
+//           return new DataPage<StatusDto>(items, hasMorePages);
+//       } catch (error) {
+//           console.error("Error fetching stories:", error);
+//           throw error; // Rethrow error to let calling function handle it
+//       }
+//   }
+public async getStoriesPage(
+    author_alias: string, 
+    pageSize: number, 
+    lastItem: StatusDto | null
+): Promise<DataPage<StatusDto>> {
+    const params = {
+        TableName: this.tableName,
+        KeyConditionExpression: `${this.author_alias} = :author_alias`,
+        ExpressionAttributeValues: {
+            ":author_alias": author_alias,
+        },
+        Limit: pageSize,
+        ScanIndexForward: false, // Reverse the order to descending
+        ExclusiveStartKey: lastItem
+            ? {
+                [this.author_alias]: lastItem.user.alias,
+                [this.timestamp]: lastItem.timestamp,
+            }
+            : undefined,
+    };
+
+    const items: StatusDto[] = [];
+    console.log("Query parameters:", params); // Debug log
+
+    try {
+        const data = await this.client.send(new QueryCommand(params));
+        console.log("Fetched items:", data.Items); // Debug log
+        const hasMorePages = data.LastEvaluatedKey !== undefined;
+
+        data.Items?.forEach((item) => {
+            const currUser = new User(
+                item[this.firstName],
+                item[this.lastName],
+                item[this.author_alias],
+                item[this.imageUrl]
+            );
+
+            items.push(
+                new Status(
+                    item[this.post],
+                    currUser,
+                    item[this.timestamp]
+                ).dto
+            );
+        });
+
+        return new DataPage<StatusDto>(items, hasMorePages);
+    } catch (error) {
+        console.error("Error fetching stories:", error);
+        throw error; // Rethrow error to let calling function handle it
+    }
+}
+
   
   
 

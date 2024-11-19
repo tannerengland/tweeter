@@ -1,12 +1,37 @@
 import { AuthToken, Status, FakeData, StatusDto, User } from "tweeter-shared";
 import { TweeterResponse } from "tweeter-shared/dist/model/net/response/TweeterResponse";
 import { DaoFactory } from "../dao/DaoFactory";
+import { FeedDao } from "../dao/FeedDao";
+import { FollowDao } from "../dao/FollowDao";
+import { SessionDao } from "../dao/SessionDao";
+import { StoryDao } from "../dao/StoryDao";
+import { UserDao } from "../dao/UserDao";
 
 export class StatusService {
 
-  private factory: DaoFactory = new DaoFactory();
-  private sessionDao = this.factory.createSessionDao();
-  private storyDao = this.factory.createStoryDao();
+  // private factory: DaoFactory = new DaoFactory();
+  // private sessionDao = this.factory.createSessionDao();
+  // private storyDao = this.factory.createStoryDao();
+
+  private factory: DaoFactory;
+  private userDao: UserDao;
+  private sessionDao: SessionDao;
+  private followDao: FollowDao;
+  private storyDao: StoryDao;
+  private feedDao: FeedDao;
+
+
+
+  constructor(daoFactory: DaoFactory) {
+    this.factory = daoFactory;
+    this.userDao = this.factory.createUserDao();
+    this.sessionDao = this.factory.createSessionDao();
+    this.followDao = this.factory.createFollowDao();
+    this.storyDao= this.factory.createStoryDao();
+    this.feedDao= this.factory.createFeedDao();
+
+  }
+  
 
   
   public async loadMoreStoryItems (

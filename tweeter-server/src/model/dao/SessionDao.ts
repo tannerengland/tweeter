@@ -5,4 +5,5 @@ export interface SessionDao {
     verifySession: (authToken: string) => Promise<boolean>;
     deleteSession: (token: string) => Promise<void>;
     updateSession: (token: string) => Promise<void>;
+    getAliasFromSession: (token: string) => Promise<string | null>;
 }

@@ -1,9 +1,10 @@
 import { UserService } from "../../model/service/UserService";
 import { AuthToken, LoginRequest } from "tweeter-shared";
 import { LoginRegisterResponse } from "tweeter-shared";
+import { DaoFactoryDynamoDB } from "../../model/dao/dynamodb/DaoFactoryDynamoDB";
 
 export const handler = async (request: LoginRequest): Promise<LoginRegisterResponse> => {
-    const userService = new UserService();
+    const userService = new UserService(new DaoFactoryDynamoDB);
     const [user, authToken] = await userService.login(request.alias, request.password);
     return {
         success: true,
