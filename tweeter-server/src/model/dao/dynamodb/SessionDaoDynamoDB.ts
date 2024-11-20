@@ -34,7 +34,9 @@ export class SessionDaoDynamoDB implements SessionDao {
             // Return the created authToken
             return authToken;
         } catch (error) {
-            console.error("Failed to create session:", error);
+            // console.error("Failed to create session:", error);
+            throw new Error("Failed to create session");
+
             return null;
         }
     }
@@ -62,8 +64,9 @@ export class SessionDaoDynamoDB implements SessionDao {
     
             return true;
         } catch (error) {
-            console.error("Error verifying session:", error);
-            
+            // console.error("Error verifying session:", error);
+            throw new Error("Error verifying session");
+
             return false;
         }
     }
@@ -74,7 +77,13 @@ export class SessionDaoDynamoDB implements SessionDao {
             TableName: this.tableName,
             Key: { [this.token]: token }
           };
-          await this.client.send(new DeleteCommand(params));
+          try {
+            await this.client.send(new DeleteCommand(params));
+        } catch (error) {
+            // console.error("Error deleting session:", error);
+            throw new Error("Error deleting session");
+
+        }
     }
 
     public async updateSession(token: string): Promise<void> {
@@ -94,7 +103,9 @@ export class SessionDaoDynamoDB implements SessionDao {
             await this.client.send(new UpdateCommand(params));
             // console.log("Session updated successfully");
         } catch (error) {
-            console.error("Error updating session:", error);
+            // console.error("Error updating session:", error);
+            throw new Error("Error updating session");
+
         }
     }
 
@@ -116,7 +127,9 @@ export class SessionDaoDynamoDB implements SessionDao {
     
             return result.Item[this.alias]; // Return the alias associated with the token
         } catch (error) {
-            console.error("Failed to get user alias:", error);
+            // console.error("Failed to get user alias:", error);
+            throw new Error("Failed to get user alias");
+
             return null; // Return null on failure
         }
     }

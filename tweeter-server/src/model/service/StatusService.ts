@@ -14,7 +14,7 @@ export class StatusService {
   // private storyDao = this.factory.createStoryDao();
 
   private factory: DaoFactory;
-  private userDao: UserDao;
+  // private userDao: UserDao;
   private sessionDao: SessionDao;
   private followDao: FollowDao;
   private storyDao: StoryDao;
@@ -24,7 +24,7 @@ export class StatusService {
 
   constructor(daoFactory: DaoFactory) {
     this.factory = daoFactory;
-    this.userDao = this.factory.createUserDao();
+    // this.userDao = this.factory.createUserDao();
     this.sessionDao = this.factory.createSessionDao();
     this.followDao = this.factory.createFollowDao();
     this.storyDao= this.factory.createStoryDao();
@@ -72,11 +72,11 @@ export class StatusService {
     // return this.getFakeData(lastItem, pageSize);
   };
 
-  private async getFakeData(lastItem: StatusDto | null, pageSize: number): Promise<[StatusDto[], boolean]> {
-    const [items, hasMore] = FakeData.instance.getPageOfStatuses(Status.fromDto(lastItem), pageSize);
-    const dtos = items.map((status) => status.dto);
-    return [dtos, hasMore];
-  }
+  // private async getFakeData(lastItem: StatusDto | null, pageSize: number): Promise<[StatusDto[], boolean]> {
+  //   const [items, hasMore] = FakeData.instance.getPageOfStatuses(Status.fromDto(lastItem), pageSize);
+  //   const dtos = items.map((status) => status.dto);
+  //   return [dtos, hasMore];
+  // }
 
   public async postStatus (
     token: string,
@@ -94,7 +94,9 @@ export class StatusService {
 
     // await this.storyDao.postStory(newStatus);
     await this.storyDao.postStory(newStatus);
-    await this.feedDao.postFeed(newStatus);
+
+    let followers = await this.followDao.getFollowers(newStatus.user.alias);
+    await this.feedDao.postFeed(newStatus, followers);
 
   };
 

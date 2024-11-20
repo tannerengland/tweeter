@@ -31,14 +31,14 @@ export class FeedDaoDynamoDB implements FeedDao {
     // readonly followeeImageUrl = "followee_image";
     private factory: DaoFactoryDynamoDB = new DaoFactoryDynamoDB();
     private userDao = this.factory.createUserDao();
-    private followDao = this.factory.createFollowDao();
+    // private followDao = this.factory.createFollowDao();
 
 
     private readonly client = DynamoDBDocumentClient.from(new DynamoDBClient());
 
-    public async postFeed(newStatus: StatusDto): Promise<void> {
+    public async postFeed(newStatus: StatusDto, followers: UserDto[]): Promise<void> {
         try {
-                let followers = await this.followDao.getFollowers(newStatus.user.alias);
+                // let followers = await this.followDao.getFollowers(newStatus.user.alias);
                 for (const follower of followers) {
                     const params = {
                         TableName: this.tableName,
@@ -57,7 +57,9 @@ export class FeedDaoDynamoDB implements FeedDao {
             }
         }
         catch(error) {
-            console.error("Error posting feed", error);
+            // console.error("Error posting feed", error);
+            throw new Error("Error posting feed");
+
             throw error;
         }
     }
@@ -171,7 +173,9 @@ export class FeedDaoDynamoDB implements FeedDao {
     
             return new DataPage<StatusDto>(items, hasMorePages);
         } catch (error) {
-            console.error("Error fetching feed:", error);
+            // console.error("Error fetching feed:", error);
+            throw new Error("Error fetching feed");
+
             throw error; // Rethrow error to let the calling function handle it
         }
     }

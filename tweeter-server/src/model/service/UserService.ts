@@ -20,8 +20,8 @@ export class UserService {
   private factory: DaoFactory;
   private userDao: UserDao;
   private sessionDao: SessionDao;
-  private followDao: FollowDao;
-  private storyDao: StoryDao;
+  // private followDao: FollowDao;
+  // private storyDao: StoryDao;
   private s3Dao: S3Dao;
 
 
@@ -29,8 +29,8 @@ export class UserService {
     this.factory = daoFactory;
     this.userDao = this.factory.createUserDao();
     this.sessionDao = this.factory.createSessionDao();
-    this.followDao = this.factory.createFollowDao();
-    this.storyDao = this.factory.createStoryDao();
+    // this.followDao = this.factory.createFollowDao();
+    // this.storyDao = this.factory.createStoryDao();
     this.s3Dao = this.factory.createS3Dao();
   }
 

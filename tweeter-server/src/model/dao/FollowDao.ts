@@ -9,5 +9,5 @@ export interface FollowDao {
     getIsFollowerStatus: (userAlias: string, selectedUserAlias: string) => Promise<boolean>;
     getPageOfFollowees: (followerHandle: string, pageSize: number, lastFolloweeHandle?: string) => Promise<DataPage<UserDto>>;
     getPageOfFollowers: (followerHandle: string, pageSize: number, lastFolloweeHandle?: string) => Promise<DataPage<UserDto>>;
-
+    getFollowers: (userAlias: string) => Promise<UserDto[]>;
 }

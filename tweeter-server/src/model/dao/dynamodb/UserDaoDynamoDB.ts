@@ -64,7 +64,9 @@ export class UserDaoDynamoDB implements UserDao {
     
             return user; // Return the UserDto
         } catch (error) {
-            console.error("Error fetching user from DynamoDB:", error);
+            // console.error("Error fetching user from DynamoDB:", error);
+            throw new Error("Error fetching user from DynamoDB");
+
             return null; // Return null on error
         }
     }
@@ -102,8 +104,11 @@ export class UserDaoDynamoDB implements UserDao {
           Key: { [this.alias]: alias },
           ProjectionExpression: `${this.alias}, ${this.firstName}, ${this.lastName}, ${this.imageUrl}, ${this.password}`
       };
-  
+
+        try {
       const output = await this.client.send(new GetCommand(params));
+      
+
   
       if (output.Item == null) {
           return null;
@@ -119,6 +124,12 @@ export class UserDaoDynamoDB implements UserDao {
       const password: string = output.Item[this.password];
   
       return  [user, password];
+    } catch (error) {
+        // console.error("Error logging in user:", error);
+        throw new Error("Error logging in user");
+
+        return null;
+    }
   }
   
 
@@ -177,7 +188,9 @@ public async registerUser(user: UserDto, password: string): Promise<UserDto | nu
         // Return the UserDto fields
         return user;
     } catch (error) {
-        console.error("Failed to register user:", error);
+        // console.error("Failed to register user:", error);
+        throw new Error("Failed to register user");
+
         return null;
     }
 }

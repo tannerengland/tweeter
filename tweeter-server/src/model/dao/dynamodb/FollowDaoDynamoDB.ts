@@ -48,7 +48,9 @@ export class FollowDaoDynamoDB implements FollowDao {
             await this.client.send(new PutCommand(params));
             console.log(`User ${userAlias} successfully followed ${userAlias}`);
         } catch (error) {
-            console.error("Error following user:", error);
+            // console.error("Error following user:", error);
+            throw new Error("Error following user");
+
             throw error; // Re-throw the error for higher-level handling
         }
     }
@@ -69,49 +71,81 @@ export class FollowDaoDynamoDB implements FollowDao {
             await this.client.send(new DeleteCommand(params));
             console.log(`User ${userAlias} successfully unfollowed ${userToUnfollowAlias}`);
         } catch (error) {
-            console.error("Error unfollowing user:", error);
+            // console.error("Error unfollowing user:", error);
+            throw new Error("Error unfollowing user");
+
             throw error; // Re-throw the error for higher-level handling
         }
     }
 
-    public async getFollowerCount(userAlias: string): Promise<number> {
+    // public async getFollowerCount(userAlias: string): Promise<number> {
+    //     const params = {
+    //         TableName: this.tableName,
+    //         IndexName: this.indexName, // Use the GSI if followers are indexed by followee_handle
+    //         KeyConditionExpression: `${this.followeeAlias} = :userAlias`,
+    //         ExpressionAttributeValues: {
+    //             ":userAlias": userAlias,
+    //         },
+    //         // Select: "COUNT", // Only return the count, not the items
+    //     };
+    
+    //     try {
+    //         const result = await this.client.send(new QueryCommand(params));
+    //         return result.Count || 0;
+    //     } catch (error) {
+    //         // console.error("Error getting follower count:", error);
+    //         throw new Error("Error getting follower count");
+
+    //         throw error;
+    //     }
+    // }
+    
+    // public async getFolloweeCount(userAlias: string): Promise<number> {
+    //     const params = {
+    //         TableName: this.tableName,
+    //         KeyConditionExpression: `${this.followerAlias} = :userAlias`,
+    //         ExpressionAttributeValues: {
+    //             ":userAlias": userAlias,
+    //         },
+    //         // Select: "COUNT", // Only return the count, not the items
+    //     };
+    
+    //     try {
+    //         const result = await this.client.send(new QueryCommand(params));
+    //         return result.Count || 0;
+    //     } catch (error) {
+    //         // console.error("Error getting followee count:", error);
+    //         throw new Error("Error getting followee count");
+
+    //         throw error;
+    //     }
+    // }
+    private async getCount(keyAlias: string, keyAliasValue: string, indexName?: string): Promise<number> {
         const params = {
             TableName: this.tableName,
-            IndexName: this.indexName, // Use the GSI if followers are indexed by followee_handle
-            KeyConditionExpression: `${this.followeeAlias} = :userAlias`,
+            KeyConditionExpression: `${keyAlias} = :key_value`,
             ExpressionAttributeValues: {
-                ":userAlias": userAlias,
+                ":key_value": keyAliasValue,
             },
-            // Select: "COUNT", // Only return the count, not the items
+            IndexName: indexName,
         };
     
         try {
             const result = await this.client.send(new QueryCommand(params));
             return result.Count || 0;
         } catch (error) {
-            console.error("Error getting follower count:", error);
-            throw error;
+            throw new Error(`Error getting count for ${keyAlias}: ${error}`);
         }
+    }
+    
+    public async getFollowerCount(userAlias: string): Promise<number> {
+        return this.getCount(this.followeeAlias, userAlias, this.indexName);
     }
     
     public async getFolloweeCount(userAlias: string): Promise<number> {
-        const params = {
-            TableName: this.tableName,
-            KeyConditionExpression: `${this.followerAlias} = :userAlias`,
-            ExpressionAttributeValues: {
-                ":userAlias": userAlias,
-            },
-            // Select: "COUNT", // Only return the count, not the items
-        };
-    
-        try {
-            const result = await this.client.send(new QueryCommand(params));
-            return result.Count || 0;
-        } catch (error) {
-            console.error("Error getting followee count:", error);
-            throw error;
-        }
+        return this.getCount(this.followerAlias, userAlias);
     }
+    
 
     public async getIsFollowerStatus(userAlias: string, selectedUserAlias: string): Promise<boolean> {
         const params = {
@@ -127,7 +161,9 @@ export class FollowDaoDynamoDB implements FollowDao {
             // If no item is found, output.Item will be undefined
             return !!output.Item;
         } catch (error) {
-            console.error("Error checking follower status:", error);
+            // console.error("Error checking follower status:", error);
+            throw new Error("Error checking follower status");
+
             throw error; // Re-throw error for higher-level handling
         }
     }
@@ -186,22 +222,118 @@ export class FollowDaoDynamoDB implements FollowDao {
     //     }
     //   }
 
-    public async getPageOfFollowees(
-        followerAlias: string, 
-        pageSize: number, 
-        lastFolloweeAlias?: string
+    // public async getPageOfFollowees(
+    //     followerAlias: string, 
+    //     pageSize: number, 
+    //     lastFolloweeAlias?: string
+    // ): Promise<DataPage<UserDto>> {
+    //     const params = {
+    //         TableName: this.tableName,
+    //         KeyConditionExpression: `${this.followerAlias} = :follower_handle`,
+    //         ExpressionAttributeValues: {
+    //             ":follower_handle": followerAlias,
+    //         },
+    //         Limit: pageSize,
+    //         ExclusiveStartKey: lastFolloweeAlias
+    //             ? {
+    //                 [this.followerAlias]: followerAlias,
+    //                 [this.followeeAlias]: lastFolloweeAlias
+    //             }
+    //             : undefined,
+    //     };
+    
+    //     const items: UserDto[] = [];
+    
+    //     try {
+    //         const data = await this.client.send(new QueryCommand(params));
+    //         const hasMorePages = data.LastEvaluatedKey !== undefined;
+    
+    //         if (data.Items) {
+    //             for (const item of data.Items) {
+    //                 const user = await this.userDao.getUser(item[this.followeeAlias]); // Ensure async handling
+    //                 if (user) {
+    //                     items.push(user);
+    //                 }
+    //             }
+    //         }
+    
+    //         return new DataPage<UserDto>(items, hasMorePages);
+    
+    //     } catch (error) {
+    //         // console.error("Error fetching followees:", error);
+    //         throw new Error("Error fetching followees");
+
+    //         throw error; // Rethrow error to let the calling function handle it
+    //     }
+    // }
+
+    // public async getPageOfFollowers(
+    //     followeeAlias: string, 
+    //     pageSize: number, 
+    //     lastFollowerAlias?: string
+    // ): Promise<DataPage<UserDto>> {
+    //     const params = {
+    //         KeyConditionExpression: this.followeeAlias + " = :loc",
+    //         ExpressionAttributeValues: {
+    //           ":loc": followeeAlias,
+    //         },
+    //         TableName: this.tableName,
+    //         IndexName: this.indexName,
+    //         Limit: pageSize,
+    //         ExclusiveStartKey:
+    //         lastFollowerAlias === undefined
+    //             ? undefined
+    //             : {
+    //                 [this.followerAlias]: lastFollowerAlias,
+    //                 [this.followeeAlias]: followeeAlias,
+    //               },
+    //       };
+    
+    //     const items: UserDto[] = [];
+    
+    //     try {
+    //         const data = await this.client.send(new QueryCommand(params));
+    //         const hasMorePages = data.LastEvaluatedKey !== undefined;
+    
+    //         if (data.Items) {
+    //             for (const item of data.Items) {
+    //                 const user = await this.userDao.getUser(item[this.followerAlias]); // Fetch user info
+    //                 if (user) {
+    //                     items.push(user);
+    //                 }
+    //             }
+    //         }
+    
+    //         return new DataPage<UserDto>(items, hasMorePages);
+    
+    //     } catch (error) {
+    //         // console.error("Error fetching followers:", error);
+    //         throw new Error("Error fetching followers");
+
+    //         throw error;
+    //     }
+    // }
+
+    private async getPage(
+        keyAlias: string,
+        keyAliasValue: string,
+        pageSize: number,
+        indexName?: string,
+        lastAliasKey?: string,
+        lastAliasValue?: string
     ): Promise<DataPage<UserDto>> {
         const params = {
             TableName: this.tableName,
-            KeyConditionExpression: `${this.followerAlias} = :follower_handle`,
+            KeyConditionExpression: `${keyAlias} = :key_value`,
             ExpressionAttributeValues: {
-                ":follower_handle": followerAlias,
+                ":key_value": keyAliasValue,
             },
+            IndexName: indexName,
             Limit: pageSize,
-            ExclusiveStartKey: lastFolloweeAlias
+            ExclusiveStartKey: lastAliasKey && lastAliasValue
                 ? {
-                    [this.followerAlias]: followerAlias,
-                    [this.followeeAlias]: lastFolloweeAlias
+                    [keyAlias]: keyAliasValue,
+                    [lastAliasKey]: lastAliasValue,
                 }
                 : undefined,
         };
@@ -213,8 +345,10 @@ export class FollowDaoDynamoDB implements FollowDao {
             const hasMorePages = data.LastEvaluatedKey !== undefined;
     
             if (data.Items) {
+                const aliasToFetch = keyAlias === this.followerAlias ? this.followeeAlias : this.followerAlias;
+    
                 for (const item of data.Items) {
-                    const user = await this.userDao.getUser(item[this.followeeAlias]); // Ensure async handling
+                    const user = await this.userDao.getUser(item[aliasToFetch]); // Ensure async handling
                     if (user) {
                         items.push(user);
                     }
@@ -222,57 +356,41 @@ export class FollowDaoDynamoDB implements FollowDao {
             }
     
             return new DataPage<UserDto>(items, hasMorePages);
-    
         } catch (error) {
-            console.error("Error fetching followees:", error);
-            throw error; // Rethrow error to let the calling function handle it
+            throw new Error(`Error fetching ${keyAlias}: ${error}`);
         }
     }
-
+    
+    public async getPageOfFollowees(
+        followerAlias: string,
+        pageSize: number,
+        lastFolloweeAlias?: string
+    ): Promise<DataPage<UserDto>> {
+        return this.getPage(
+            this.followerAlias,
+            followerAlias,
+            pageSize,
+            undefined,
+            this.followeeAlias,
+            lastFolloweeAlias
+        );
+    }
+    
     public async getPageOfFollowers(
-        followeeAlias: string, 
-        pageSize: number, 
+        followeeAlias: string,
+        pageSize: number,
         lastFollowerAlias?: string
     ): Promise<DataPage<UserDto>> {
-        const params = {
-            KeyConditionExpression: this.followeeAlias + " = :loc",
-            ExpressionAttributeValues: {
-              ":loc": followeeAlias,
-            },
-            TableName: this.tableName,
-            IndexName: this.indexName,
-            Limit: pageSize,
-            ExclusiveStartKey:
-            lastFollowerAlias === undefined
-                ? undefined
-                : {
-                    [this.followerAlias]: lastFollowerAlias,
-                    [this.followeeAlias]: followeeAlias,
-                  },
-          };
-    
-        const items: UserDto[] = [];
-    
-        try {
-            const data = await this.client.send(new QueryCommand(params));
-            const hasMorePages = data.LastEvaluatedKey !== undefined;
-    
-            if (data.Items) {
-                for (const item of data.Items) {
-                    const user = await this.userDao.getUser(item[this.followerAlias]); // Fetch user info
-                    if (user) {
-                        items.push(user);
-                    }
-                }
-            }
-    
-            return new DataPage<UserDto>(items, hasMorePages);
-    
-        } catch (error) {
-            console.error("Error fetching followers:", error);
-            throw error;
-        }
+        return this.getPage(
+            this.followeeAlias,
+            followeeAlias,
+            pageSize,
+            this.indexName,
+            this.followerAlias,
+            lastFollowerAlias
+        );
     }
+    
 
     public async getFollowers(userAlias: string): Promise<UserDto[]> {
         const params = {
@@ -301,7 +419,9 @@ export class FollowDaoDynamoDB implements FollowDao {
     
             return followers;
         } catch (error) {
-            console.error("Error fetching followers:", error);
+            // console.error("Error fetching followers:", error);
+            throw new Error("Error fetching followers");
+
             throw error;
         }
     }

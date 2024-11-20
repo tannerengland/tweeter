@@ -9,14 +9,14 @@ import { UserDao } from "../dao/UserDao";
 export class FollowService {
   // private factory: DaoFactory = new DaoFactory();
   private factory: DaoFactory;
-  private userDao: UserDao;
+  // private userDao: UserDao;
   private sessionDao: SessionDao;
   private followDao: FollowDao;
 
 
   constructor(daoFactory: DaoFactory) {
     this.factory = daoFactory;
-    this.userDao = this.factory.createUserDao();
+    // this.userDao = this.factory.createUserDao();
     this.sessionDao = this.factory.createSessionDao();
     this.followDao = this.factory.createFollowDao();
   }

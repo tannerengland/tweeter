@@ -50,7 +50,9 @@ export class StoryDaoDynamoDB implements StoryDao {
             await this.client.send(new PutCommand(params));
             // Return the created authToken
         } catch (error) {
-            console.error("Failed to post story", error);
+            // console.error("Failed to post story", error);
+            throw new Error("Failed to post story");
+
         }
         
     };
@@ -259,7 +261,9 @@ public async getStoriesPage(
 
         return new DataPage<StatusDto>(items, hasMorePages);
     } catch (error) {
-        console.error("Error fetching stories:", error);
+        // console.error("Error fetching stories:", error);
+        throw new Error("Error fetching stories");
+
         throw error; // Rethrow error to let calling function handle it
     }
 }
