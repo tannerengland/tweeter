@@ -65,6 +65,7 @@ export class AuthToken {
   }
 
   public static fromDto(dto: AuthTokenDto): AuthToken {
+    
     return new AuthToken(dto.token, dto.timestamp);
   }
 

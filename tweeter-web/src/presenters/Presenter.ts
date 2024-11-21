@@ -25,6 +25,8 @@ export class Presenter<V extends View> {
         } catch (error) {
           this.view.displayErrorMessage(
             `Failed to ${operationDescription} because of exception: ${(error as Error).message}`
+
+            // `Failed to ${operationDescription}`
           );
         }
     }; 
@@ -35,6 +37,8 @@ export class Presenter<V extends View> {
       } catch (error) {
         this.view.displayErrorMessage(
           `Failed to ${operationDescription} because of exception: ${(error as Error).message}`
+          // `Failed to ${operationDescription}`
+
         );
       } finally {
         operation2();

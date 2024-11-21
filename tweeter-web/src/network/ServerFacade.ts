@@ -236,6 +236,8 @@ export class ServerFacade {
 
     const authToken: AuthToken = AuthToken.fromDto(response.authToken) as AuthToken;
 
+    console.log("server facade token: " + authToken.token);
+
     // Handle errors
     return this.handleErrors(response, () => {
       if (user == null) {

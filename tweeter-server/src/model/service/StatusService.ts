@@ -1,4 +1,4 @@
-import { AuthToken, Status, FakeData, StatusDto, User } from "tweeter-shared";
+import { AuthToken, Status, FakeData, StatusDto, User, UserDto } from "tweeter-shared";
 import { TweeterResponse } from "tweeter-shared/dist/model/net/response/TweeterResponse";
 import { DaoFactory } from "../dao/DaoFactory";
 import { FeedDao } from "../dao/FeedDao";
@@ -6,6 +6,7 @@ import { FollowDao } from "../dao/FollowDao";
 import { SessionDao } from "../dao/SessionDao";
 import { StoryDao } from "../dao/StoryDao";
 import { UserDao } from "../dao/UserDao";
+import { StatusItem } from "../util/StatusItem";
 
 export class StatusService {
 
@@ -14,7 +15,7 @@ export class StatusService {
   // private storyDao = this.factory.createStoryDao();
 
   private factory: DaoFactory;
-  // private userDao: UserDao;
+  private userDao: UserDao;
   private sessionDao: SessionDao;
   private followDao: FollowDao;
   private storyDao: StoryDao;
@@ -24,7 +25,7 @@ export class StatusService {
 
   constructor(daoFactory: DaoFactory) {
     this.factory = daoFactory;
-    // this.userDao = this.factory.createUserDao();
+    this.userDao = this.factory.createUserDao();
     this.sessionDao = this.factory.createSessionDao();
     this.followDao = this.factory.createFollowDao();
     this.storyDao= this.factory.createStoryDao();
@@ -47,12 +48,66 @@ export class StatusService {
       throw new Error("Not authorized");
     }
 
+    let storyItems: StatusDto[] = [];
+
 
     let result = await this.storyDao.getStoriesPage(userAlias, pageSize, lastItem);
 
-    return [result.values, result.hasMorePages];
+    // console.log("AFTER RESULT")
+
+    storyItems = await this.processStatusItems(result.values);
+
+    // for (const item of result.values) {
+
+    //   const currUserDto: UserDto | null = await this.userDao.getUser(item.author_alias);
+    //   const currUser: User|null = User.fromDto(currUserDto);
+
+    //   if (currUserDto && currUser) {
+    //     storyItems.push(
+    //           new Status(
+    //               item.post,
+    //               currUser,
+    //               item.timestamp
+    //           ).dto
+    //       );
+    //   } else {
+    //       console.error("Error fetching user for status");
+    //   }
+
+    // }
+
+
+
+    return [storyItems, result.hasMorePages];
     // return this.getFakeData(lastItem, pageSize);
   };
+
+  private async processStatusItems(values: StatusItem[]): Promise<StatusDto[]> {
+    let feedOrStoryItems: StatusDto[] = [];
+    for (const item of values) {
+
+      const currUserDto: UserDto | null = await this.userDao.getUser(item.author_alias);
+      const currUser: User|null = User.fromDto(currUserDto);
+
+      if (currUserDto && currUser) {
+        feedOrStoryItems.push(
+              new Status(
+                  item.post,
+                  currUser,
+                  item.timestamp
+              ).dto
+          );
+      } else {
+        throw new Error("Error fetching users");
+      }
+
+    }
+
+    return feedOrStoryItems;
+  }
+
+
+  
 
   public async loadMoreFeedItems (
     token: string,
@@ -68,7 +123,52 @@ export class StatusService {
 
     let result = await this.feedDao.getFeedPage(userAlias, pageSize, lastItem);
 
-    return [result.values, result.hasMorePages];
+
+
+    let feedItems: StatusDto[] = [];
+
+    // for (const item of result.values) {
+
+    //   const currUserDto: UserDto | null = await this.userDao.getUser(item.author_alias);
+    //   const currUser: User|null = User.fromDto(currUserDto);
+
+    //   if (currUserDto && currUser) {
+    //     feedItems.push(
+    //           new Status(
+    //               item.post,
+    //               currUser,
+    //               item.timestamp
+    //           ).dto
+    //       );
+    //   } else {
+    //       console.error("Error fetching user for status");
+    //   }
+
+    // }
+    feedItems = await this.processStatusItems(result.values);
+
+
+
+    // for (const item of result.values) {
+    //   const currUserDto: UserDto | null = await this.userDao.getUser(item);
+    //   const currUser: User|null = User.fromDto(currUserDto);
+
+    //   if (currUserDto && currUser) {
+
+    //     feedItems.push(
+    //           new Status(
+    //               item[this.post],
+    //               currUser,
+    //               item[this.timestamp]
+    //           ).dto
+    //       );
+    //   } else {
+    //       console.error("Error fetching user for status:", item[this.authorAlias]);
+    //   }
+
+    // }
+
+    return [feedItems, result.hasMorePages];
     // return this.getFakeData(lastItem, pageSize);
   };
 
@@ -93,10 +193,31 @@ export class StatusService {
     // author_alias, timestamp, JSON.Stringify(newStatus)
 
     // await this.storyDao.postStory(newStatus);
-    await this.storyDao.postStory(newStatus);
+    try {
 
-    let followers = await this.followDao.getFollowers(newStatus.user.alias);
-    await this.feedDao.postFeed(newStatus, followers);
+      await this.storyDao.postStory(newStatus);
+
+
+      let followersAlias = await this.followDao.getFollowers(newStatus.user.alias);
+
+      let followers: UserDto[] = [];
+
+      for (const followerAlias of followersAlias) {
+        // Fetch each user's details using UserDao and convert to UserDto
+
+          const user = await this.userDao.getUser(followerAlias);
+          if (user) {
+              followers.push(user);
+          }
+      }
+
+    
+      await this.feedDao.postFeed(newStatus, followers);
+    }
+      catch {
+        throw new Error("Error posting status");
+
+    }
 
   };
 

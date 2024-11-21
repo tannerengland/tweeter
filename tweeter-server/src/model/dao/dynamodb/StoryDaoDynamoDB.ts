@@ -12,16 +12,17 @@ import {
   import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { StoryDao } from "../StoryDao";
 import { DataPage } from "../../util/DataPage";
+import { StatusItem } from "../../util/StatusItem";
 
 export class StoryDaoDynamoDB implements StoryDao {
     readonly tableName = "stories";
 
     readonly timestamp = "timestamp"; 
     readonly post = "post";
-    readonly firstName = "firstName";
-    readonly lastName = "lastName";
+    // readonly firstName = "firstName";
+    // readonly lastName = "lastName";
     readonly author_alias = "author_alias";
-    readonly imageUrl = "imageUrl";
+    // readonly imageUrl = "imageUrl";
     // readonly author_alias = "author_alias";
     // readonly timestamp = "timestamp"; 
     // readonly status = "status";
@@ -38,10 +39,10 @@ export class StoryDaoDynamoDB implements StoryDao {
             Item: {
                 [this.author_alias]: currStatus.user.alias,
                 [this.timestamp]: currStatus.timestamp,
-                [this.post]: currStatus.post,
-                [this.firstName]: currStatus.user.firstName,
-                [this.lastName]: currStatus.user.lastName,
-                [this.imageUrl]: currStatus.user.imageUrl
+                [this.post]: currStatus.post
+                // [this.firstName]: currStatus.user.firstName,
+                // [this.lastName]: currStatus.user.lastName,
+                // [this.imageUrl]: currStatus.user.imageUrl
 
             },
         };
@@ -217,7 +218,7 @@ public async getStoriesPage(
     author_alias: string, 
     pageSize: number, 
     lastItem: StatusDto | null
-): Promise<DataPage<StatusDto>> {
+): Promise<DataPage<StatusItem>> {
     const params = {
         TableName: this.tableName,
         KeyConditionExpression: `${this.author_alias} = :author_alias`,
@@ -234,7 +235,7 @@ public async getStoriesPage(
             : undefined,
     };
 
-    const items: StatusDto[] = [];
+    const items: StatusItem[] = [];
     console.log("Query parameters:", params); // Debug log
 
     try {
@@ -242,24 +243,31 @@ public async getStoriesPage(
         console.log("Fetched items:", data.Items); // Debug log
         const hasMorePages = data.LastEvaluatedKey !== undefined;
 
-        data.Items?.forEach((item) => {
-            const currUser = new User(
-                item[this.firstName],
-                item[this.lastName],
-                item[this.author_alias],
-                item[this.imageUrl]
-            );
 
-            items.push(
-                new Status(
-                    item[this.post],
-                    currUser,
-                    item[this.timestamp]
-                ).dto
-            );
-        });
+        const statusItems: StatusItem[] = data.Items?.map(item => ({
+            timestamp: item[this.timestamp],
+            post: item[this.post],
+            author_alias: item[this.author_alias],
+        })) || []; 
 
-        return new DataPage<StatusDto>(items, hasMorePages);
+        // data.Items?.forEach((item) => {
+        //     const currUser = new User(
+        //         item[this.firstName],
+        //         item[this.lastName],
+        //         item[this.author_alias],
+        //         item[this.imageUrl]
+        //     );
+
+        //     items.push(
+        //         new Status(
+        //             item[this.post],
+        //             currUser,
+        //             item[this.timestamp]
+        //         ).dto
+        //     );
+        // });
+
+        return new DataPage<StatusItem>(statusItems, hasMorePages);
     } catch (error) {
         // console.error("Error fetching stories:", error);
         throw new Error("Error fetching stories");

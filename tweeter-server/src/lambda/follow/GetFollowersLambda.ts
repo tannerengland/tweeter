@@ -6,7 +6,7 @@ import { FollowService } from "../../model/service/FollowService";
 export const handler = async (request: PagedUserItemRequest): Promise<PagedUserItemResponse> => {
     const followService = new FollowService(new DaoFactoryDynamoDB);
     const [items, hasMore] = await followService.loadMoreFollowers(request.token, request.userAlias, request.pageSize, request.lastItem);
-
+    console.log("handler hasMore: " + hasMore);
     return {
         success: true,
         message: undefined,

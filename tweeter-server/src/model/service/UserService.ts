@@ -7,7 +7,7 @@ import { FollowDao } from "../dao/FollowDao";
 import { StoryDao } from "../dao/StoryDao";
 import { S3Dao } from "../dao/S3Dao";
 // import bcrypt from 'bcryptjs';
-// import {SHA256} from "crypto-js";
+import {SHA256} from "crypto-js";
 // import {genSalt, hash} from "bcryptjs";
 
 
@@ -58,8 +58,8 @@ export class UserService {
         const [ currUser, currPassword ] = result;
 
         // hash the password passed in
-        // const hashedPassword = SHA256(password).toString();
-        if (password != currPassword) {
+        const hashedPassword = SHA256(password).toString();
+        if (hashedPassword != currPassword) {
           throw new Error("Invalid alias or password");
         }
 
@@ -78,6 +78,8 @@ export class UserService {
         if (currAuth === null) {
           throw new Error("Unable to create session");
         }
+
+        // console.log("user service(server side) token: " + currAuth.token);
 
         //SessionDao.createSession(alias, password) => authToken
         //UserDao.getUser(alias) => user
@@ -135,12 +137,12 @@ export class UserService {
 
         //cryptojs
         // const CryptoJS = require("crypto-js");
-        // const hashedPassword = SHA256(password).toString();
+        const hashedPassword = SHA256(password).toString();
 
         // const salt = await genSalt(10);
         // const hashedPassword = await hash(password, salt);
 
-        let currUser = await this.userDao.registerUser(userDto, password);
+        let currUser = await this.userDao.registerUser(userDto, hashedPassword);
         // let currUser = await this.userDao.getUser(alias);
 
         if (currUser === null) {
@@ -187,17 +189,31 @@ export class UserService {
         // const user: UserDto | null = await this.userDao.getUser(alias);
 
         // return user ? user : null;
-        const user = await this.userDao.getUser(alias);
+
+        try {
+          const user = await this.userDao.getUser(alias);
         // console.log("service user " + user)
 
-        return user; // Directly return user or null
+          return user; // Directly return user or null
+        }
+        catch {
+          throw new Error("Unable to get user");
+
+        }
       };
 
       public async logout (token: string): Promise<void> {
         // Pause so we can see the logging out message. Delete when the call to the server is implemented.
         // await new Promise((res) => setTimeout(res, 1000));
 
-        await this.sessionDao.deleteSession(token);
+        try {
+
+         await this.sessionDao.deleteSession(token);
+        }
+        catch {
+          throw new Error("Unable to log out");
+
+        }
       };
 
 

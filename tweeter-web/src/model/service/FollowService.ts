@@ -19,6 +19,7 @@ export class FollowService {
           pageSize: pageSize,
           lastItem: lastItem == null ? lastItem: lastItem.dto
         };
+        console.log("loadMoreFollowers");
         return await this.currServerFacade.getMoreFollowers(request);
       };
     

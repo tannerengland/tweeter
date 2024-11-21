@@ -55,7 +55,7 @@ const ItemScroller = <TItemType,TService>(props: Props<TItemType,TService>) => {
   const loadMoreItems = async () => {
     presenter.loadMoreItems(authToken!, displayedUser!.alias);
     // THIS IS WHAT PREVENTS FROM LOADING UNTIL SCROLL
-    // setChangedDisplayedUser(false);
+    setChangedDisplayedUser(false);
   };
 
   return (

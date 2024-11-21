@@ -9,58 +9,142 @@ import { UserDao } from "../dao/UserDao";
 export class FollowService {
   // private factory: DaoFactory = new DaoFactory();
   private factory: DaoFactory;
-  // private userDao: UserDao;
+  private userDao: UserDao;
   private sessionDao: SessionDao;
   private followDao: FollowDao;
 
 
   constructor(daoFactory: DaoFactory) {
     this.factory = daoFactory;
-    // this.userDao = this.factory.createUserDao();
+    this.userDao = this.factory.createUserDao();
     this.sessionDao = this.factory.createSessionDao();
     this.followDao = this.factory.createFollowDao();
   }
   
 
+  public async loadMoreItems(
+    token: string,
+    userAlias: string,
+    pageSize: number,
+    lastItem: UserDto | null,
+    fetchItems: (userAlias: string, pageSize: number, lastAlias: string | undefined) => Promise<{ values: string[]; hasMorePages: boolean }>
+  ): Promise<[UserDto[], boolean]> {
+    if (!(await this.sessionDao.verifySession(token))) {
+      throw new Error("Not authorized");
+    }
+  
+    try {
+      const lastAlias = lastItem ? lastItem.alias : undefined;
+      const result = await fetchItems(userAlias, pageSize, lastAlias);
 
-    public async loadMoreFollowers (
-        token: string,
-        userAlias: string,
-        pageSize: number,
-        lastItem: UserDto | null
-      ): Promise<[UserDto[], boolean]> {
-        // TODO: Replace with the result of calling server
-        if (await this.sessionDao.verifySession(token) == false) {
-          throw new Error("Not authorized");
+    
+      const users: UserDto[] = [];
+      for (const item of result.values) {
+        const user = await this.userDao.getUser(item); // Ensure async handling
+        if (user) {
+          users.push(user);
         }
+      }
+    
+      return [users, result.hasMorePages];
 
-        const lastFollowerAlias = lastItem ? lastItem.alias : undefined;
-    
-        const result = await this.followDao.getPageOfFollowers(userAlias, pageSize, lastFollowerAlias);
-    
-        return [result.values, result.hasMorePages];
+    }
+    catch {
+      throw new Error("Error getting follow items");
 
-        // return this.getFakeData(lastItem, pageSize, userAlias);
-      };
+    }
+  }
+  
+  public async loadMoreFollowers(
+    token: string,
+    userAlias: string,
+    pageSize: number,
+    lastItem: UserDto | null
+  ): Promise<[UserDto[], boolean]> {
+    return this.loadMoreItems(token, userAlias, pageSize, lastItem, this.followDao.getPageOfFollowers.bind(this.followDao));
+  }
+  
+  public async loadMoreFollowees(
+    token: string,
+    userAlias: string,
+    pageSize: number,
+    lastItem: UserDto | null
+  ): Promise<[UserDto[], boolean]> {
+    return this.loadMoreItems(token, userAlias, pageSize, lastItem, this.followDao.getPageOfFollowees.bind(this.followDao));
+  }
+  
+
+    // public async loadMoreFollowers (
+    //     token: string,
+    //     userAlias: string,
+    //     pageSize: number,
+    //     lastItem: UserDto | null
+    //   ): Promise<[UserDto[], boolean]> {
+    //     // TODO: Replace with the result of calling server
+    //     if (await this.sessionDao.verifySession(token) == false) {
+    //       throw new Error("Not authorized");
+    //     }
+
+    //     const lastFollowerAlias = lastItem ? lastItem.alias : undefined;
     
-    public async loadMoreFollowees (
-        token: string,
-        userAlias: string,
-        pageSize: number,
-        lastItem: UserDto | null
-      ): Promise<[UserDto[], boolean]> {
-        // TODO: Replace with the result of calling server
-          if (await this.sessionDao.verifySession(token) == false) {
-            throw new Error("Not authorized");
-          }
+
+    //     const result = await this.followDao.getPageOfFollowers(userAlias, pageSize, lastFollowerAlias);
+
+    //     // if (data.Items) {
+    //     //   const aliasToFetch = keyAlias === this.followerAlias ? this.followeeAlias : this.followerAlias;
+
+    //     //   for (const item of data.Items) {
+    //     //       const user = await this.userDao.getUser(item[aliasToFetch]); // Ensure async handling
+    //     //       if (user) {
+    //     //           items.push(user);
+    //     //       }
+    //     //   }
+    //     // }
+
+    //     let users: UserDto[] = [];
+
+    //     for (const item of result.values) {
+    //         const user = await this.userDao.getUser(item); // Ensure async handling
+    //         if (user) {
+    //           users.push(user);
+    //         }
+    //     }
+
     
-        const lastFolloweeAlias = lastItem ? lastItem.alias : undefined;
+    //     return [users, result.hasMorePages];
+
+    //     // return this.getFakeData(lastItem, pageSize, userAlias);
+    //   };
     
-        const result = await this.followDao.getPageOfFollowees(userAlias, pageSize, lastFolloweeAlias);
+    // public async loadMoreFollowees (
+    //     token: string,
+    //     userAlias: string,
+    //     pageSize: number,
+    //     lastItem: UserDto | null
+    //   ): Promise<[UserDto[], boolean]> {
+    //     // TODO: Replace with the result of calling server
+    //       if (await this.sessionDao.verifySession(token) == false) {
+    //         throw new Error("Not authorized");
+    //       }
     
-        return [result.values, result.hasMorePages];
-        // return this.getFakeData(lastItem, pageSize, userAlias);
-      };
+    //     const lastFolloweeAlias = lastItem ? lastItem.alias : undefined;
+    
+    //     const result = await this.followDao.getPageOfFollowees(userAlias, pageSize, lastFolloweeAlias);
+    //     let users: UserDto[] = [];
+
+    //     for (const item of result.values) {
+    //         const user = await this.userDao.getUser(item); // Ensure async handling
+    //         if (user) {
+    //           users.push(user);
+    //         }
+    //     }
+
+    
+    //     return [users, result.hasMorePages];
+    
+    //     // return [result.values, result.hasMorePages];
+    //     // return this.getFakeData(lastItem, pageSize, userAlias);
+    //   };
 
   // private async getFakeData(lastItem: any, pageSize: number, userAlias: string): Promise<[UserDto[], boolean]> {
   //   const [items, hasMore] = FakeData.instance.getPageOfUsers(User.fromDto(lastItem), pageSize, userAlias);
@@ -78,8 +162,13 @@ export class FollowService {
           throw new Error("Not authorized");
         }
 
+        try {
+          return await this.followDao.getIsFollowerStatus(user.alias, selectedUser.alias);
+        }
+        catch {
+          throw new Error("Error getting follower status");
 
-        return await this.followDao.getIsFollowerStatus(user.alias, selectedUser.alias);
+        }
 
         // return FakeData.instance.isFollower();
       };
@@ -93,7 +182,14 @@ export class FollowService {
           throw new Error("Not authorized");
         }
 
-        return await this.followDao.getFolloweeCount(user.alias);
+        try {
+
+          return await this.followDao.getFolloweeCount(user.alias);
+        }
+        catch {
+          throw new Error("Error getting followee count");
+
+        }
 
 
         // return FakeData.instance.getFolloweeCount(user.alias);
@@ -109,7 +205,13 @@ export class FollowService {
           throw new Error("Not authorized");
         }
 
-        return await this.followDao.getFollowerCount(user.alias);
+        try {
+          return await this.followDao.getFollowerCount(user.alias);
+        }
+        catch {
+          throw new Error("Error getting follower count");
+
+        }
 
         // return FakeData.instance.getFollowerCount(user.alias);
       };
@@ -124,6 +226,8 @@ export class FollowService {
           throw new Error("Not authorized");
         }
 
+      try {
+
         let currAlias: string | null = await this.sessionDao.getAliasFromSession(token);
 
         if (currAlias == null) {
@@ -137,11 +241,18 @@ export class FollowService {
         // }
 
         await this.followDao.followUser(currAlias, userToFollow.alias);
+
+      }
+      catch {
+        throw new Error("Error following user");
+      }
     
         // TODO: Call the server
     
         const followerCount = await this.getFollowerCount(token, userToFollow);
         const followeeCount = await this.getFolloweeCount(token, userToFollow);
+
+
     
         return [followerCount, followeeCount];
       };
@@ -158,6 +269,8 @@ export class FollowService {
           throw new Error("Not authorized");
         }
 
+
+      try {
         let currAlias: string | null = await this.sessionDao.getAliasFromSession(token);
 
         if (currAlias == null) {
@@ -165,8 +278,12 @@ export class FollowService {
         }
 
         await this.followDao.unfollowUser(currAlias, userToUnfollow.alias);
+      }
+      catch {
+        throw new Error("Error unfollowing user");
+      }
 
-    
+
         // TODO: Call the server
     
         const followerCount = await this.getFollowerCount(token, userToUnfollow);

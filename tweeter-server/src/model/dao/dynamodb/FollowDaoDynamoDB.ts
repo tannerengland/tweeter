@@ -26,8 +26,8 @@ export class FollowDaoDynamoDB implements FollowDao {
     // readonly followerLastName = "follower_last_name";
     // readonly followerImageUrl = "follower_image";
     // readonly followeeImageUrl = "followee_image";
-    private factory: DaoFactoryDynamoDB = new DaoFactoryDynamoDB();
-    private userDao = this.factory.createUserDao();
+    // private factory: DaoFactoryDynamoDB = new DaoFactoryDynamoDB();
+    // private userDao = this.factory.createUserDao();
 
 
 
@@ -321,7 +321,7 @@ export class FollowDaoDynamoDB implements FollowDao {
         indexName?: string,
         lastAliasKey?: string,
         lastAliasValue?: string
-    ): Promise<DataPage<UserDto>> {
+    ): Promise<DataPage<string>> {
         const params = {
             TableName: this.tableName,
             KeyConditionExpression: `${keyAlias} = :key_value`,
@@ -338,24 +338,41 @@ export class FollowDaoDynamoDB implements FollowDao {
                 : undefined,
         };
     
-        const items: UserDto[] = [];
+        const items: string[] = [];
     
         try {
             const data = await this.client.send(new QueryCommand(params));
             const hasMorePages = data.LastEvaluatedKey !== undefined;
-    
+
             if (data.Items) {
                 const aliasToFetch = keyAlias === this.followerAlias ? this.followeeAlias : this.followerAlias;
-    
+
                 for (const item of data.Items) {
-                    const user = await this.userDao.getUser(item[aliasToFetch]); // Ensure async handling
-                    if (user) {
-                        items.push(user);
-                    }
+                    items.push(item[aliasToFetch]);
                 }
             }
+
+                    // if (data.Items) {
+        //   const aliasToFetch = keyAlias === this.followerAlias ? this.followeeAlias : this.followerAlias;
+
+        //   for (const item of data.Items) {
+        //       const user = await this.userDao.getUser(item[aliasToFetch]); // Ensure async handling
+        //       if (user) {
+        //           items.push(user);
+        //       }
+        //   }
+        // }
+            const dataItems = data.Items ? items : []; // Convert to string[] or empty array
+
+
+
+            return new DataPage<string>(dataItems, hasMorePages);
     
-            return new DataPage<UserDto>(items, hasMorePages);
+
+            // console.log("dao hasMore: " + hasMorePages);
+
+    
+            // return new DataPage<UserDto>(items, hasMorePages);
         } catch (error) {
             throw new Error(`Error fetching ${keyAlias}: ${error}`);
         }
@@ -365,7 +382,7 @@ export class FollowDaoDynamoDB implements FollowDao {
         followerAlias: string,
         pageSize: number,
         lastFolloweeAlias?: string
-    ): Promise<DataPage<UserDto>> {
+    ): Promise<DataPage<string>> {
         return this.getPage(
             this.followerAlias,
             followerAlias,
@@ -380,7 +397,7 @@ export class FollowDaoDynamoDB implements FollowDao {
         followeeAlias: string,
         pageSize: number,
         lastFollowerAlias?: string
-    ): Promise<DataPage<UserDto>> {
+    ): Promise<DataPage<string>> {
         return this.getPage(
             this.followeeAlias,
             followeeAlias,
@@ -392,7 +409,7 @@ export class FollowDaoDynamoDB implements FollowDao {
     }
     
 
-    public async getFollowers(userAlias: string): Promise<UserDto[]> {
+    public async getFollowers(userAlias: string): Promise<string[]> {
         const params = {
             TableName: this.tableName,
             IndexName: this.indexName,
@@ -402,7 +419,7 @@ export class FollowDaoDynamoDB implements FollowDao {
             },
         };
     
-        const followers: UserDto[] = [];
+        const followers: string[] = [];
     
         try {
             const data = await this.client.send(new QueryCommand(params));
@@ -410,10 +427,10 @@ export class FollowDaoDynamoDB implements FollowDao {
             if (data.Items) {
                 for (const item of data.Items) {
                     // Fetch each user's details using UserDao and convert to UserDto
-                    const user = await this.userDao.getUser(item[this.followerAlias]);
-                    if (user) {
-                        followers.push(user);
-                    }
+                    // const user = await this.userDao.getUser(item[this.followerAlias]);
+                    // if (user) {
+                        followers.push(item[this.followerAlias]);
+                    // }
                 }
             }
     

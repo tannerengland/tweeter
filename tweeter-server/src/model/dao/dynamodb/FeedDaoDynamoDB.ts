@@ -14,6 +14,7 @@ import { DataPage } from "../../util/DataPage";
 import { UserDaoDynamoDB } from "./UserDaoDynamoDB";
 import { DaoFactory } from "../DaoFactory";
 import { DaoFactoryDynamoDB } from "./DaoFactoryDynamoDB";
+import { StatusItem } from "../../util/StatusItem";
 
 export class FeedDaoDynamoDB implements FeedDao {
     readonly tableName = "feed";
@@ -29,8 +30,8 @@ export class FeedDaoDynamoDB implements FeedDao {
     // readonly followerLastName = "follower_last_name";
     // readonly followerImageUrl = "follower_image";
     // readonly followeeImageUrl = "followee_image";
-    private factory: DaoFactoryDynamoDB = new DaoFactoryDynamoDB();
-    private userDao = this.factory.createUserDao();
+    // private factory: DaoFactoryDynamoDB = new DaoFactoryDynamoDB();
+    // private userDao = this.factory.createUserDao();
     // private followDao = this.factory.createFollowDao();
 
 
@@ -124,7 +125,7 @@ export class FeedDaoDynamoDB implements FeedDao {
         receiver_alias: string,
         pageSize: number,
         lastItem: StatusDto | null
-    ): Promise<DataPage<StatusDto>> {
+    ): Promise<DataPage<StatusItem>> {
         const params = {
             TableName: this.tableName,
             KeyConditionExpression: `${this.receiverAlias} = :receiver_alias`,
@@ -141,7 +142,7 @@ export class FeedDaoDynamoDB implements FeedDao {
                 : undefined,
         };
     
-        const items: StatusDto[] = [];
+        const items: string[] = [];
         console.log("Query parameters:", params); // Debug log
     
         try {
@@ -149,29 +150,55 @@ export class FeedDaoDynamoDB implements FeedDao {
             console.log("Fetched items:", data.Items); // Debug log
     
             const hasMorePages = data.LastEvaluatedKey !== undefined;
-    
-            if (data.Items) {
-                for (const item of data.Items) {
-                    // Await user fetch synchronously
-                    const currUserDto: UserDto | null = await this.userDao.getUser(item[this.authorAlias]);
-                    const currUser: User|null = User.fromDto(currUserDto);
 
-                    if (currUserDto && currUser) {
+            // if (data.Items != null) {
+            //     return new DataPage<Record<string, any>[]>(data.Items, hasMorePages);
+            // }
+
+
+
+            // data.Items?.forEach((item) => {
+            //     // console.log("timestamp:" + item[this.timestamp]);
+            //     // console.log("post:" + item[this.post]);
+            //     // console.log("alias:" + item[this.authorAlias]);
+
+                
+
+            //     statusItems.push(item[this.timestamp], item[this.post], item[this.authorAlias])
+            //     // console.log(statusItems);
+            // });
+            const statusItems: StatusItem[] = data.Items?.map(item => ({
+                timestamp: item[this.timestamp],
+                post: item[this.post],
+                author_alias: item[this.authorAlias],
+            })) || []; 
+
+            return new DataPage<StatusItem>(statusItems, hasMorePages);
+
     
-                        items.push(
-                            new Status(
-                                item[this.post],
-                                currUser,
-                                item[this.timestamp]
-                            ).dto
-                        );
-                    } else {
-                        console.error("Error fetching user for status:", item[this.authorAlias]);
-                    }
-                }
-            }
+            // if (data.Items) {
+            //     for (const item of data.Items) {
+
+            //         // items.push(item[this.authorAlias]);
+            //         const currUserDto: UserDto | null = await this.userDao.getUser(item[this.authorAlias]);
+            //         const currUser: User|null = User.fromDto(currUserDto);
+
+            //         if (currUserDto && currUser) {
     
-            return new DataPage<StatusDto>(items, hasMorePages);
+            //             items.push(
+            //                 new Status(
+            //                     item[this.post],
+            //                     currUser,
+            //                     item[this.timestamp]
+            //                 ).dto
+            //             );
+            //         } else {
+            //             console.error("Error fetching user for status:", item[this.authorAlias]);
+            //         }
+            //     }
+            // }
+    
+            // return new DataPage<string>(items, hasMorePages);
         } catch (error) {
             // console.error("Error fetching feed:", error);
             throw new Error("Error fetching feed");
