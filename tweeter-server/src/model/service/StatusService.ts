@@ -197,6 +197,7 @@ export class StatusService {
 
       await this.storyDao.postStory(newStatus);
 
+      // here down maybe allow for it to run in the background?
 
       let followersAlias = await this.followDao.getFollowers(newStatus.user.alias);
 
@@ -212,6 +213,7 @@ export class StatusService {
       }
 
     
+    
       await this.feedDao.postFeed(newStatus, followers);
     }
       catch {
@@ -220,5 +222,7 @@ export class StatusService {
     }
 
   };
+
+  
 
 }
