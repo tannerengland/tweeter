@@ -9,6 +9,7 @@ import { FeedDaoDynamoDB } from "./FeedDaoDynamoDB";
 import { FollowDaoDynamoDB } from "./FollowDaoDynamoDB";
 import { S3DaoDynamoDB } from "./S3DaoDynamoDB";
 import { SessionDaoDynamoDB } from "./SessionDaoDynamoDB";
+import { SqsDaoDynamoDB } from "./SqsDaoDynamoDB";
 import { StoryDaoDynamoDB } from "./StoryDaoDynamoDB";
 import { UserDaoDynamoDB } from "./UserDaoDynamoDB";
 
@@ -36,5 +37,9 @@ export class DaoFactoryDynamoDB implements DaoFactory {
 
     public createFeedDao() {
         return new FeedDaoDynamoDB();
+    }
+
+    public createSqsDao() {
+        return new SqsDaoDynamoDB();
     }
 }

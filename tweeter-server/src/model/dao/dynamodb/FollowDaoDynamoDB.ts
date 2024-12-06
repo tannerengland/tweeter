@@ -8,7 +8,7 @@ import {
     QueryCommand,
     UpdateCommand,
   } from "@aws-sdk/lib-dynamodb";
-  import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+  import { DynamoDBClient, QueryCommandInput } from "@aws-sdk/client-dynamodb";
 import { FollowDao } from "../FollowDao";
 import { DataPage } from "../../util/DataPage";
 import { UserDaoDynamoDB } from "./UserDaoDynamoDB";
@@ -32,6 +32,8 @@ export class FollowDaoDynamoDB implements FollowDao {
 
 
     private readonly client = DynamoDBDocumentClient.from(new DynamoDBClient());
+
+    private batchSize: number = 25;
 
     public async followUser(userAlias: string, userToFollowAlias: string): Promise<void> {
         const params = {
@@ -120,6 +122,7 @@ export class FollowDaoDynamoDB implements FollowDao {
     //         throw error;
     //     }
     // }
+    
     private async getCount(keyAlias: string, keyAliasValue: string, indexName?: string): Promise<number> {
         const params = {
             TableName: this.tableName,
@@ -439,12 +442,116 @@ export class FollowDaoDynamoDB implements FollowDao {
             // console.error("Error fetching followers:", error);
             throw new Error("Error fetching followers");
 
-            throw error;
+            // throw error;
         }
     }
+
+    // public async getFollowers(userAlias: string): Promise<string[]> {
+    //     const followers: string[] = [];
+    //     let lastEvaluatedKey: Record<string, any> | undefined = undefined;
+
+    //     try {
+    //         do {
+    //             const params: QueryCommandInput = {
+    //                 TableName: this.tableName,
+    //                 IndexName: this.indexName,
+    //                 KeyConditionExpression: `${this.followeeAlias} = :userAlias`,
+    //                 ExpressionAttributeValues: {
+    //                     ":userAlias": { S: userAlias }, // Wrapping the string in an AttributeValue
+    //                 },
+    //                 ExclusiveStartKey: lastEvaluatedKey, // For paginated queries
+    //             };
+
+    //             const data = await this.client.send(new QueryCommand(params));
+
+    //             if (data.Items) {
+    //                 followers.push(
+    //                     ...data.Items.map((item) => item[this.followerAlias]?.S as string) // Extract string value
+    //                 );
+    //             }
+
+    //             lastEvaluatedKey = data.LastEvaluatedKey; // Prepare for the next iteration
+    //         } while (lastEvaluatedKey);
+
+    //         return followers;
+    //     } catch (error) {
+    //         console.error("Error fetching followers:", error);
+    //         throw new Error("Error fetching followers");
+    //     }
+    // }
+
+    // public async getFollowers(userAlias: string): Promise<string[]> {
+    //     const followers: string[] = [];
+    //     let lastEvaluatedKey: Record<string, any> | undefined = undefined;
+
+    //     try {
+    //         do {
+    //             const params: QueryCommandInput = {
+    //                 TableName: this.tableName,
+    //                 IndexName: this.indexName,
+    //                 KeyConditionExpression: `${this.followeeAlias} = :userAlias`,
+    //                 ExpressionAttributeValues: {
+    //                     ":userAlias": userAlias, // Use plain string if using DynamoDBDocumentClient
+    //                 },
+    //                 ExclusiveStartKey: lastEvaluatedKey, // Pagination key
+    //             };
+
+    //             const data = await this.client.send(new QueryCommand(params));
+
+    //             if (data.Items) {
+    //                 followers.push(
+    //                     ...data.Items.map((item) => item[this.followerAlias] as string)
+    //                 );
+    //             }
+
+    //             lastEvaluatedKey = data.LastEvaluatedKey; // Prepare for the next iteration
+    //         } while (lastEvaluatedKey);
+
+    //         return followers;
+    //     } catch (error) {
+    //         console.error("Error fetching followers:", error);
+    //         throw new Error("Error fetching followers");
+    //     }
+    // }
     
     
     
+    // public async getFollowers(userAlias: string): Promise<string[]> {
+    //     const followers: string[] = [];
+    //     let lastEvaluatedKey: Record<string, any> | undefined = undefined;
+    
+    //     try {
+    //         do {
+    //             const params: QueryCommandInput = {
+    //                 TableName: this.tableName,
+    //                 IndexName: this.indexName,
+    //                 KeyConditionExpression: `${this.followeeAlias} = :userAlias`,
+    //                 ExpressionAttributeValues: {
+    //                     ":userAlias": { S: userAlias },
+    //                 },
+    //                 Limit: this.batchSize,
+    //                 ExclusiveStartKey: lastEvaluatedKey,
+    //             };
+    
+    //             const data = await this.client.send(new QueryCommand(params));
+    
+    //             if (data.Items) {
+    //                 for (const item of data.Items) {
+    //                     if (item[this.followerAlias] && item[this.followerAlias].S) {
+    //                         followers.push(item[this.followerAlias].S);
+    //                     }
+    //                 }
+    //             }
+    
+    //             lastEvaluatedKey = data.LastEvaluatedKey;
+    //         } while (lastEvaluatedKey);
+    
+    //         return followers;
+    //     } catch (error) {
+    //         console.error("Error fetching followers:", error);
+    //         throw new Error("Error fetching followers");
+    //     }
+    // }
     
 
 }

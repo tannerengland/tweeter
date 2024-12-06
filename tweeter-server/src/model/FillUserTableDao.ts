@@ -6,7 +6,9 @@ import {
   BatchWriteCommandOutput,
   UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
-import * as bcrypt from "bcryptjs";
+// import * as bcrypt from "bcryptjs";
+import {SHA256} from "crypto-js";
+
 import { User } from "tweeter-shared";
 
 export class FillUserTableDao {
@@ -19,8 +21,8 @@ export class FillUserTableDao {
   private readonly userLastNameAttribute = "lastName";
   private readonly userImageUrlAttribute = "imageUrl";
   private readonly passwordHashAttribute = "password";
-  private readonly followeeCountAttribute = "followeeCount";
-  private readonly followerCountAttribute = "followerCount";
+  // private readonly followeeCountAttribute = "followeeCount";
+  // private readonly followerCountAttribute = "followerCount";
 
   private readonly client = DynamoDBDocumentClient.from(new DynamoDBClient());
 
@@ -30,7 +32,9 @@ export class FillUserTableDao {
       return;
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = SHA256(password).toString();
+
 
     const params = {
       RequestItems: {
@@ -64,8 +68,8 @@ export class FillUserTableDao {
       [this.userLastNameAttribute]: user.lastName,
       [this.passwordHashAttribute]: hashedPassword,
       [this.userImageUrlAttribute]: user.imageUrl,
-      [this.followerCountAttribute]: 0,
-      [this.followeeCountAttribute]: 1,
+      // [this.followerCountAttribute]: 0,
+      // [this.followeeCountAttribute]: 1,
     };
 
     return {
@@ -109,25 +113,25 @@ export class FillUserTableDao {
     }
   }
 
-  async increaseFollowersCount(alias: string, count: number): Promise<boolean> {
-    const params = {
-      TableName: this.tableName,
-      Key: { [this.userAliasAttribute]: alias },
-      ExpressionAttributeValues: { ":inc": count },
-      UpdateExpression:
-        "SET " +
-        this.followerCountAttribute +
-        " = " +
-        this.followerCountAttribute +
-        " + :inc",
-    };
+//   async increaseFollowersCount(alias: string, count: number): Promise<boolean> {
+//     const params = {
+//       TableName: this.tableName,
+//       Key: { [this.userAliasAttribute]: alias },
+//       ExpressionAttributeValues: { ":inc": count },
+//       UpdateExpression:
+//         "SET " +
+//         this.followerCountAttribute +
+//         " = " +
+//         this.followerCountAttribute +
+//         " + :inc",
+//     };
 
-    try {
-      await this.client.send(new UpdateCommand(params));
-      return true;
-    } catch (err) {
-      console.error("Error while updating followers count:", err);
-      return false;
-    }
-  }
+//     try {
+//       await this.client.send(new UpdateCommand(params));
+//       return true;
+//     } catch (err) {
+//       console.error("Error while updating followers count:", err);
+//       return false;
+//     }
+//   }
 }

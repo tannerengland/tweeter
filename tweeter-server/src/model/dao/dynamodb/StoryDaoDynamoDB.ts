@@ -272,7 +272,7 @@ public async getStoriesPage(
         // console.error("Error fetching stories:", error);
         throw new Error("Error fetching stories");
 
-        throw error; // Rethrow error to let calling function handle it
+        // throw error; // Rethrow error to let calling function handle it
     }
 }
 

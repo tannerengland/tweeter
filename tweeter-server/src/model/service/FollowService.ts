@@ -278,6 +278,7 @@ export class FollowService {
         }
 
         await this.followDao.unfollowUser(currAlias, userToUnfollow.alias);
+        
       }
       catch {
         throw new Error("Error unfollowing user");

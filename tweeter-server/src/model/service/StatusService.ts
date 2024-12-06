@@ -4,6 +4,7 @@ import { DaoFactory } from "../dao/DaoFactory";
 import { FeedDao } from "../dao/FeedDao";
 import { FollowDao } from "../dao/FollowDao";
 import { SessionDao } from "../dao/SessionDao";
+import { SqsDao } from "../dao/SqsDao";
 import { StoryDao } from "../dao/StoryDao";
 import { UserDao } from "../dao/UserDao";
 import { StatusItem } from "../util/StatusItem";
@@ -20,6 +21,7 @@ export class StatusService {
   private followDao: FollowDao;
   private storyDao: StoryDao;
   private feedDao: FeedDao;
+  private sqsDao: SqsDao;
 
 
 
@@ -30,6 +32,7 @@ export class StatusService {
     this.followDao = this.factory.createFollowDao();
     this.storyDao= this.factory.createStoryDao();
     this.feedDao= this.factory.createFeedDao();
+    this.sqsDao = this.factory.createSqsDao();
   }
   
 
@@ -197,24 +200,26 @@ export class StatusService {
 
       await this.storyDao.postStory(newStatus);
 
-      // here down maybe allow for it to run in the background?
+      this.sqsDao.postStatus(newStatus);
 
-      let followersAlias = await this.followDao.getFollowers(newStatus.user.alias);
+      // // here down maybe allow for it to run in the background?
 
-      let followers: UserDto[] = [];
+      // let followersAlias = await this.followDao.getFollowers(newStatus.user.alias);
 
-      for (const followerAlias of followersAlias) {
-        // Fetch each user's details using UserDao and convert to UserDto
+      // let followers: UserDto[] = [];
 
-          const user = await this.userDao.getUser(followerAlias);
-          if (user) {
-              followers.push(user);
-          }
-      }
+      // for (const followerAlias of followersAlias) {
+      //   // Fetch each user's details using UserDao and convert to UserDto
+
+      //     const user = await this.userDao.getUser(followerAlias);
+      //     if (user) {
+      //         followers.push(user);
+      //     }
+      // }
 
     
     
-      await this.feedDao.postFeed(newStatus, followers);
+      // await this.feedDao.postFeed(newStatus, followers);
     }
       catch {
         throw new Error("Error posting status");
@@ -222,6 +227,54 @@ export class StatusService {
     }
 
   };
+
+  public async postToFeed(currStatus: StatusDto) {
+      // do with batches of 25
+      let followersAlias = await this.followDao.getFollowers(currStatus.user.alias);
+
+
+      // let followers: UserDto[] = [];
+
+      // for (const followerAlias of followersAlias) {
+      //   // Fetch each user's details using UserDao and convert to UserDto
+
+      //     const user = await this.userDao.getUser(followerAlias);
+      //     if (user) {
+      //         followers.push(user);
+      //     }
+      // }
+
+      // console.log(currStatus);
+      // console.log(followersAlias);
+      // console.log("ENTERING POSTTOFEEDS A");
+
+
+
+      
+      this.sqsDao.postToFeeds(currStatus, followersAlias);
+
+  }
+
+  public async postFeeds(currStatus: StatusDto, followers: string[]) {
+    // do with batches of 25
+
+    // let followers: UserDto[] = [];
+
+    // for (const followerAlias of followersAlias) {
+    //   // Fetch each user's details using UserDao and convert to UserDto
+
+    //     const user = await this.userDao.getUser(followerAlias);
+    //     if (user) {
+    //         followers.push(user);
+    //     }
+    // }
+
+    
+    await this.feedDao.postFeed(currStatus, followers);
+
+}
+
+
 
   
 

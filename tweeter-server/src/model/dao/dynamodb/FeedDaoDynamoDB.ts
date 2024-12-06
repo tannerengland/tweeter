@@ -1,6 +1,8 @@
 import { FakeData, Follow, Status, StatusDto, User, UserDto } from "tweeter-shared";
 import { UserDao } from "../UserDao";
 import {
+    BatchWriteCommand,
+    BatchWriteCommandInput,
     DeleteCommand,
     DynamoDBDocumentClient,
     GetCommand,
@@ -37,32 +39,157 @@ export class FeedDaoDynamoDB implements FeedDao {
 
     private readonly client = DynamoDBDocumentClient.from(new DynamoDBClient());
 
-    public async postFeed(newStatus: StatusDto, followers: UserDto[]): Promise<void> {
-        try {
-                // let followers = await this.followDao.getFollowers(newStatus.user.alias);
-                for (const follower of followers) {
-                    const params = {
-                        TableName: this.tableName,
-                        Item: {
-                            [this.receiverAlias]: follower.alias,
-                            [this.timestamp]: newStatus.timestamp,
-                            [this.post]: newStatus.post,
-                            [this.authorAlias]: newStatus.user.alias
-                        },
-                    };
-                    try {
-                        await this.client.send(new PutCommand(params));
-                    } catch (error) {
-                        console.error("Failed to post feed to a user", error);
-                    }
-            }
-        }
-        catch(error) {
-            // console.error("Error posting feed", error);
-            throw new Error("Error posting feed");
+    // public async postFeed(newStatus: StatusDto, followers: UserDto[]): Promise<void> {
+    //     try {
+    //             // let followers = await this.followDao.getFollowers(newStatus.user.alias);
+    //             for (const follower of followers) {
+    //                 const params = {
+    //                     TableName: this.tableName,
+    //                     Item: {
+    //                         [this.receiverAlias]: follower.alias,
+    //                         [this.timestamp]: newStatus.timestamp,
+    //                         [this.post]: newStatus.post,
+    //                         [this.authorAlias]: newStatus.user.alias
+    //                     },
+    //                 };
+    //                 try {
+    //                     await this.client.send(new PutCommand(params));
+    //                 } catch (error) {
+    //                     console.error("Failed to post feed to a user", error);
+    //                 }
+    //         }
+    //     }
+    //     catch(error) {
+    //         // console.error("Error posting feed", error);
+    //         throw new Error("Error posting feed");
 
-            throw error;
+    //         // throw error;
+    //     }
+    // }
+
+    // public async postFeed(newStatus: StatusDto, followers: string[]): Promise<void> {
+    //     try {
+    //             // let followers = await this.followDao.getFollowers(newStatus.user.alias);
+    //             for (const follower of followers) {
+    //                 const params = {
+    //                     TableName: this.tableName,
+    //                     Item: {
+    //                         [this.receiverAlias]: follower,
+    //                         [this.timestamp]: newStatus.timestamp,
+    //                         [this.post]: newStatus.post,
+    //                         [this.authorAlias]: newStatus.user.alias
+    //                     },
+    //                 };
+    //                 try {
+    //                     await this.client.send(new PutCommand(params));
+    //                 } catch (error) {
+    //                     console.error("Failed to post feed to a user", error);
+    //                 }
+    //         }
+    //     }
+    //     catch(error) {
+    //         // console.error("Error posting feed", error);
+    //         throw new Error("Error posting feed");
+
+    //         // throw error;
+    //     }
+    // }
+
+    // public async postFeed(newStatus: StatusDto, followers: string[]): Promise<void> {
+    //     try {
+    //         const items = followers.map((follower) => ({
+    //             PutRequest: {
+    //                 Item: {
+    //                     [this.receiverAlias]: follower,
+    //                     [this.timestamp]: newStatus.timestamp,
+    //                     [this.post]: newStatus.post,
+    //                     [this.authorAlias]: newStatus.user.alias,
+    //                 },
+    //             },
+    //         }));
+
+    //         // Break items into batches of 25
+    //         const batches = this.chunkArray(items, 25);
+
+    //         for (const batch of batches) {
+    //             const params: BatchWriteCommandInput = {
+    //                 RequestItems: {
+    //                     [this.tableName]: batch,
+    //                 },
+    //             };
+
+    //             try {
+    //                 const result = await this.client.send(new BatchWriteCommand(params));
+    //                 if (result.UnprocessedItems && Object.keys(result.UnprocessedItems).length > 0) {
+    //                     console.error("Some items were not processed:", result.UnprocessedItems);
+    //                     // Handle retries here if needed
+    //                 }
+    //             } catch (error) {
+    //                 console.error("Failed to batch write items", error);
+    //             }
+    //         }
+    //     } catch (error) {
+    //         console.error("Error posting feed", error);
+    //         throw new Error("Error posting feed");
+    //     }
+    // }
+
+    // // Utility function to split array into chunks
+    // private chunkArray<T>(array: T[], chunkSize: number): T[][] {
+    //     const chunks: T[][] = [];
+    //     for (let i = 0; i < array.length; i += chunkSize) {
+    //         chunks.push(array.slice(i, i + chunkSize));
+    //     }
+    //     return chunks;
+    // }
+
+    public async postFeed(newStatus: StatusDto, followers: string[]): Promise<void> {
+        try {
+            // Create items for each follower
+            const items = followers.map((follower) => ({
+                PutRequest: {
+                    Item: {
+                        [this.receiverAlias]: follower,
+                        [this.timestamp]: newStatus.timestamp,
+                        [this.post]: newStatus.post,
+                        [this.authorAlias]: newStatus.user.alias,
+                    },
+                },
+            }));
+    
+            // Break items into batches of 25
+            const batches = this.chunkArray(items, 25);
+    
+            for (const batch of batches) {
+                const params: BatchWriteCommandInput = {
+                    RequestItems: {
+                        [this.tableName]: batch,
+                    },
+                };
+    
+                try {
+                    const result = await this.client.send(new BatchWriteCommand(params));
+                    if (result.UnprocessedItems && Object.keys(result.UnprocessedItems).length > 0) {
+                        console.warn("Some items were not processed:", result.UnprocessedItems);
+                        // Optionally retry unprocessed items here
+                    }
+                } catch (error) {
+                    console.error("Error writing batch to DynamoDB:", error);
+                }
+            }
+        } catch (error) {
+            console.error("Error posting feed:", error);
+            throw new Error("Error posting feed");
         }
+    }
+    
+    // Utility function to split an array into chunks
+    private chunkArray<T>(array: T[], chunkSize: number): T[][] {
+        const chunks: T[][] = [];
+        for (let i = 0; i < array.length; i += chunkSize) {
+            chunks.push(array.slice(i, i + chunkSize));
+        }
+        return chunks;
     }
 
     // public async getFeedPage(

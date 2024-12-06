@@ -32,11 +32,11 @@ async function main() {
   console.log("Creating follows");
   await createFollows(0);
 
-  console.log("Increasing the followee's followers count");
-  await fillUserTableDao.increaseFollowersCount(
-    mainUsername,
-    numbUsersToCreate
-  );
+  // console.log("Increasing the followee's followers count");
+  // await fillUserTableDao.increaseFollowersCount(
+  //   mainUsername,
+  //   numbUsersToCreate
+  // );
 
   console.log("Done!");
 }
