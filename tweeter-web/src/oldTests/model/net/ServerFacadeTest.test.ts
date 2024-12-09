@@ -1,3 +1,5 @@
+export {}
+
 // import "isomorphic-fetch";
 // import { instance, mock, verify, spy, when } from "ts-mockito";
 // import { AuthToken, GetFollowCountRequest, PagedUserItemRequest, RegisterRequest, UserDto } from "tweeter-shared";

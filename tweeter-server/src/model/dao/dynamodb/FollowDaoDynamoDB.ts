@@ -412,32 +412,78 @@ export class FollowDaoDynamoDB implements FollowDao {
     }
     
 
-    public async getFollowers(userAlias: string): Promise<string[]> {
+    // public async getFollowers(userAlias: string): Promise<string[]> {
+    //     const params = {
+    //         TableName: this.tableName,
+    //         IndexName: this.indexName,
+    //         KeyConditionExpression: `${this.followeeAlias} = :userAlias`,
+    //         ExpressionAttributeValues: {
+    //             ":userAlias": userAlias,
+    //         },
+    //     };
+    
+    //     const followers: string[] = [];
+    
+    //     try {
+    //         const data = await this.client.send(new QueryCommand(params));
+    
+    //         if (data.Items) {
+    //             for (const item of data.Items) {
+    //                 // Fetch each user's details using UserDao and convert to UserDto
+    //                 // const user = await this.userDao.getUser(item[this.followerAlias]);
+    //                 // if (user) {
+    //                     followers.push(item[this.followerAlias]);
+    //                 // }
+    //             }
+    //         }
+    
+    //         return followers;
+    //     } catch (error) {
+    //         // console.error("Error fetching followers:", error);
+    //         throw new Error("Error fetching followers");
+
+    //         // throw error;
+    //     }
+    // }
+
+    public async getFollowers(followeeAlias: string, lastFollower?: Record<string, any>): Promise<[string[],  Record<string, any> | undefined, boolean]> {
         const params = {
             TableName: this.tableName,
             IndexName: this.indexName,
             KeyConditionExpression: `${this.followeeAlias} = :userAlias`,
             ExpressionAttributeValues: {
-                ":userAlias": userAlias,
+                ":userAlias": followeeAlias,
             },
+            Limit: 25,
+            ...(lastFollower ? { ExclusiveStartKey: lastFollower } :{})
         };
     
-        const followers: string[] = [];
     
         try {
             const data = await this.client.send(new QueryCommand(params));
     
-            if (data.Items) {
-                for (const item of data.Items) {
-                    // Fetch each user's details using UserDao and convert to UserDto
-                    // const user = await this.userDao.getUser(item[this.followerAlias]);
-                    // if (user) {
-                        followers.push(item[this.followerAlias]);
-                    // }
-                }
-            }
+            // if (data.Items) {
+                // for (const item of data.Items) {
+                //     // Fetch each user's details using UserDao and convert to UserDto
+                //     // const user = await this.userDao.getUser(item[this.followerAlias]);
+                //     // if (user) {
+                //         followers.push(item[this.followerAlias]);
+                //     // }
+                // }
+                const followers = data.Items?.map(
+                    item => item[this.followerAlias]
+                ) || [];
+
+                const hasMore = !!data.LastEvaluatedKey;
+
+                return [
+                    followers,
+                    data.LastEvaluatedKey,
+                    hasMore
+                ];
+
+            // }
     
-            return followers;
         } catch (error) {
             // console.error("Error fetching followers:", error);
             throw new Error("Error fetching followers");

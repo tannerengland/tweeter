@@ -7,8 +7,8 @@ import { strict as assert } from "assert";
 function SqsTest() {
     let currSqs = new SqsDaoDynamoDB();
     const currStatus: StatusDto = {
-        post: "Hello, goose!",
-        user: { firstName: "Nate", lastName: "Skon", alias: "@daisy", imageUrl: "http://example.com/avatar.jpg" },
+        post: "okay testing for 10k",
+        user: { firstName: "Daisy", lastName: "Duck", alias: "@daisy", imageUrl: "https://profilepicturebucketcs340.s3.us-east-2.amazonaws.com/image/@daisy" },
         timestamp: 1630512000,
     };
 

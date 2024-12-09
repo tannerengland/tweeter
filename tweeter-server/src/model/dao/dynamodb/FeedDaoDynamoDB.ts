@@ -95,6 +95,46 @@ export class FeedDaoDynamoDB implements FeedDao {
     //     }
     // }
 
+    public async postFeed(newStatus: StatusDto, followers: string[]): Promise<void> {
+        try {
+            const BATCH_SIZE = 25;
+    
+            // Break followers into batches of 25
+            for (let i = 0; i < followers.length; i += BATCH_SIZE) {
+                const batch = followers.slice(i, i + BATCH_SIZE);
+    
+                // Create the batch write request
+                const writeRequests = batch.map((follower) => ({
+                    PutRequest: {
+                        Item: {
+                            [this.receiverAlias]: follower,
+                            [this.timestamp]: newStatus.timestamp,
+                            [this.post]: newStatus.post,
+                            [this.authorAlias]: newStatus.user.alias,
+                        },
+                    },
+                }));
+    
+                const params = {
+                    RequestItems: {
+                        [this.tableName]: writeRequests,
+                    },
+                };
+    
+                try {
+                    // Send the batch write command
+                    await this.client.send(new BatchWriteCommand(params));
+                    console.log(`Batch of ${batch.length} written successfully.`);
+                } catch (error) {
+                    console.error("Failed to write batch to DynamoDB", error);
+                }
+            }
+        } catch (error) {
+            console.error("Error posting feed", error);
+            throw new Error("Error posting feed");
+        }
+    }
+
     // public async postFeed(newStatus: StatusDto, followers: string[]): Promise<void> {
     //     try {
     //         const items = followers.map((follower) => ({
@@ -143,54 +183,54 @@ export class FeedDaoDynamoDB implements FeedDao {
     //     return chunks;
     // }
 
-    public async postFeed(newStatus: StatusDto, followers: string[]): Promise<void> {
-        try {
-            // Create items for each follower
-            const items = followers.map((follower) => ({
-                PutRequest: {
-                    Item: {
-                        [this.receiverAlias]: follower,
-                        [this.timestamp]: newStatus.timestamp,
-                        [this.post]: newStatus.post,
-                        [this.authorAlias]: newStatus.user.alias,
-                    },
-                },
-            }));
+    // public async postFeed(newStatus: StatusDto, followers: string[]): Promise<void> {
+    //     try {
+    //         // Create items for each follower
+    //         const items = followers.map((follower) => ({
+    //             PutRequest: {
+    //                 Item: {
+    //                     [this.receiverAlias]: follower,
+    //                     [this.timestamp]: newStatus.timestamp,
+    //                     [this.post]: newStatus.post,
+    //                     [this.authorAlias]: newStatus.user.alias,
+    //                 },
+    //             },
+    //         }));
     
-            // Break items into batches of 25
-            const batches = this.chunkArray(items, 25);
+    //         // Break items into batches of 25
+    //         const batches = this.chunkArray(items, 25);
     
-            for (const batch of batches) {
-                const params: BatchWriteCommandInput = {
-                    RequestItems: {
-                        [this.tableName]: batch,
-                    },
-                };
+    //         for (const batch of batches) {
+    //             const params: BatchWriteCommandInput = {
+    //                 RequestItems: {
+    //                     [this.tableName]: batch,
+    //                 },
+    //             };
     
-                try {
-                    const result = await this.client.send(new BatchWriteCommand(params));
-                    if (result.UnprocessedItems && Object.keys(result.UnprocessedItems).length > 0) {
-                        console.warn("Some items were not processed:", result.UnprocessedItems);
-                        // Optionally retry unprocessed items here
-                    }
-                } catch (error) {
-                    console.error("Error writing batch to DynamoDB:", error);
-                }
-            }
-        } catch (error) {
-            console.error("Error posting feed:", error);
-            throw new Error("Error posting feed");
-        }
-    }
+    //             try {
+    //                 const result = await this.client.send(new BatchWriteCommand(params));
+    //                 if (result.UnprocessedItems && Object.keys(result.UnprocessedItems).length > 0) {
+    //                     console.warn("Some items were not processed:", result.UnprocessedItems);
+    //                     // Optionally retry unprocessed items here
+    //                 }
+    //             } catch (error) {
+    //                 console.error("Error writing batch to DynamoDB:", error);
+    //             }
+    //         }
+    //     } catch (error) {
+    //         console.error("Error posting feed:", error);
+    //         throw new Error("Error posting feed");
+    //     }
+    // }
     
-    // Utility function to split an array into chunks
-    private chunkArray<T>(array: T[], chunkSize: number): T[][] {
-        const chunks: T[][] = [];
-        for (let i = 0; i < array.length; i += chunkSize) {
-            chunks.push(array.slice(i, i + chunkSize));
-        }
-        return chunks;
-    }
+    // // Utility function to split an array into chunks
+    // private chunkArray<T>(array: T[], chunkSize: number): T[][] {
+    //     const chunks: T[][] = [];
+    //     for (let i = 0; i < array.length; i += chunkSize) {
+    //         chunks.push(array.slice(i, i + chunkSize));
+    //     }
+    //     return chunks;
+    // }
 
     // public async getFeedPage(
     //     receiver_alias: string, 

@@ -1,4 +1,4 @@
-import { AuthToken, Status, FakeData, StatusDto, User, UserDto } from "tweeter-shared";
+import { AuthToken, Status, FakeData, User, UserDto, StatusDto } from "tweeter-shared";
 import { TweeterResponse } from "tweeter-shared/dist/model/net/response/TweeterResponse";
 import { DaoFactory } from "../dao/DaoFactory";
 import { FeedDao } from "../dao/FeedDao";
@@ -8,6 +8,7 @@ import { SqsDao } from "../dao/SqsDao";
 import { StoryDao } from "../dao/StoryDao";
 import { UserDao } from "../dao/UserDao";
 import { StatusItem } from "../util/StatusItem";
+import { UpdateFeedsDto } from "../util/UpdateFeedsDto";
 
 export class StatusService {
 
@@ -200,7 +201,7 @@ export class StatusService {
 
       await this.storyDao.postStory(newStatus);
 
-      this.sqsDao.postStatus(newStatus);
+      await this.sqsDao.postStatus(newStatus);
 
       // // here down maybe allow for it to run in the background?
 
@@ -229,8 +230,11 @@ export class StatusService {
   };
 
   public async postToFeed(currStatus: StatusDto) {
+
+    if (!currStatus) {
+      throw new Error("[Bad Request] status is undefined")
+    }
       // do with batches of 25
-      let followersAlias = await this.followDao.getFollowers(currStatus.user.alias);
 
 
       // let followers: UserDto[] = [];
@@ -244,15 +248,24 @@ export class StatusService {
       //     }
       // }
 
+
+      // let followersAlias = await this.followDao.getFollowers(currStatus.user.alias);
+
+
       // console.log(currStatus);
       // console.log(followersAlias);
       // console.log("ENTERING POSTTOFEEDS A");
 
+      let hasMore: boolean = true;
+      let lastFollower = undefined;
+      let followersBatch: string[] = [];
+      while (hasMore) {
+        [followersBatch, lastFollower, hasMore] = await this.followDao.getFollowers(currStatus.user.alias, lastFollower);
 
+        const updateFeedDto: UpdateFeedsDto = {status: currStatus, followers: followersBatch}
 
-      
-      this.sqsDao.postToFeeds(currStatus, followersAlias);
-
+        this.sqsDao.postToFeeds(updateFeedDto);
+      }
   }
 
   public async postFeeds(currStatus: StatusDto, followers: string[]) {
@@ -269,7 +282,7 @@ export class StatusService {
     //     }
     // }
 
-    
+    // batches of 25
     await this.feedDao.postFeed(currStatus, followers);
 
 }

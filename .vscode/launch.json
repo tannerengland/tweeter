@@ -1,0 +1,41 @@
+// {
+//     // Use IntelliSense to learn about possible attributes.
+//     // Hover to view descriptions of existing attributes.
+//     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+//     "version": "0.2.0",
+//     "configurations": [
+//         {
+//             "type": "pwa-node",
+//             "request": "launch",
+//             "name": "Launch Program",
+//             "skipFiles": [
+//                 "<node_internals>/**"
+//             ],
+//             "program": "${workspaceFolder}/tweeter-server/src/model/service/StatusService.ts",
+//             "outFiles": [
+//                 "${workspaceFolder}/**/*.js"
+//             ]
+//         }
+//     ]
+// }
+
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "type": "node",
+        "request": "launch",
+        "name": "Run SqsTest with ts-node",
+        "runtimeExecutable": "npx",
+        "runtimeArgs": ["ts-node"],
+        "args": ["tweeter-server/src/model/SqsTest.ts"], // Adjust path as needed
+        // "cwd": "tweeter-server",
+        "env": {
+          "NODE_ENV": "development" // Set your environment variables if needed
+        },
+        "outFiles": ["tweeter-server/**/*.js"], // Needed for source maps
+        "sourceMaps": true // Enable source maps for debugging
+      }
+    ]
+  }
+  
